@@ -1,0 +1,58 @@
+
+import React from 'react';
+import { NewsItem as NewsItemType } from '@/lib/types';
+import { CategoryIcon, getCategoryName } from './icons/CategoryIcons';
+import { dummySources } from '@/lib/dummyData';
+import { ExternalLink } from 'lucide-react';
+
+interface NewsItemProps {
+  item: NewsItemType;
+}
+
+const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return new Date(dateString).toLocaleDateString('it-IT', options);
+  };
+
+  const source = dummySources.find(source => source.id === item.sourceId);
+  
+  return (
+    <div className="news-card animate-fade-in">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`category-badge category-badge-${item.category} flex items-center gap-1`}>
+          <CategoryIcon category={item.category} size={14} />
+          <span>{getCategoryName(item.category)}</span>
+        </div>
+        <span className="text-xs text-muted-foreground">{formatDate(item.date)}</span>
+      </div>
+      
+      <h3 className="text-lg font-medium mb-2">{item.title}</h3>
+      
+      {item.summary && (
+        <p className="text-sm text-gray-600 mb-3">{item.summary}</p>
+      )}
+      
+      <div className="flex justify-between items-center text-xs mt-3">
+        <span className="text-muted-foreground">
+          Fonte: {source?.name || 'Fonte sconosciuta'}
+        </span>
+        
+        <a 
+          href={item.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-primary hover:underline"
+        >
+          Leggi articolo <ExternalLink size={12} />
+        </a>
+      </div>
+    </div>
+  );
+};
+
+export default NewsItem;
