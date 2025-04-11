@@ -41,3 +41,8 @@ export interface EmailSettings {
   senderEmail: string;
   weeklyDigestDay: number; // 0-6, where 0 is Sunday
 }
+
+export interface EmailTestResult {
+  success: boolean;
+  message: string;
+}

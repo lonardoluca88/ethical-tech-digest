@@ -4,12 +4,15 @@ import { NewsItem as NewsItemType } from '@/lib/types';
 import { CategoryIcon, getCategoryName } from './icons/CategoryIcons';
 import { dummySources } from '@/lib/dummyData';
 import { ExternalLink } from 'lucide-react';
+import { useLinkChecker } from '@/hooks/useLinkChecker';
 
 interface NewsItemProps {
   item: NewsItemType;
 }
 
 const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
+  const { isValid, isLoading } = useLinkChecker(item.url);
+  
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
@@ -42,14 +45,18 @@ const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
           Fonte: {source?.name || 'Fonte sconosciuta'}
         </span>
         
-        <a 
-          href={item.url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-primary hover:underline"
-        >
-          Leggi articolo <ExternalLink size={12} />
-        </a>
+        {isLoading ? (
+          <span className="text-muted-foreground text-xs italic">Verifica link in corso...</span>
+        ) : isValid ? (
+          <a 
+            href={item.url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-primary hover:underline"
+          >
+            Leggi articolo <ExternalLink size={12} />
+          </a>
+        ) : null}
       </div>
     </div>
   );

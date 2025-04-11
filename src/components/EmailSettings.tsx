@@ -8,7 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Send, LockKeyhole } from 'lucide-react';
+import { Send, LockKeyhole, Loader2 } from 'lucide-react';
+import { sendTestEmail } from '@/lib/emailService';
 
 interface EmailSettingsProps {
   settings: AppSettings;
@@ -17,6 +18,8 @@ interface EmailSettingsProps {
 
 const EmailSettings: React.FC<EmailSettingsProps> = ({ settings, onUpdate }) => {
   const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
+  const [isSending, setIsSending] = useState(false);
+  
   const weekdays = [
     { value: '0', label: 'Domenica' },
     { value: '1', label: 'Lunedì' },
@@ -77,9 +80,24 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({ settings, onUpdate }) => 
     toast.success('Impostazioni email aggiornate con successo');
   };
   
-  const handleTestEmail = () => {
-    // This would typically connect to a backend service to send a test email
-    toast.info('Email di prova inviata! Controlla la tua casella di posta.');
+  const handleTestEmail = async () => {
+    setIsSending(true);
+    
+    try {
+      // Invia email di test utilizzando il servizio
+      const result = await sendTestEmail(localSettings.emailSettings);
+      
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error('Errore durante l\'invio dell\'email di test:', error);
+      toast.error('Si è verificato un errore durante l\'invio dell\'email di test. Controlla la console per maggiori dettagli.');
+    } finally {
+      setIsSending(false);
+    }
   };
   
   return (
@@ -210,9 +228,19 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({ settings, onUpdate }) => 
                 onClick={handleTestEmail} 
                 variant="outline" 
                 className="flex items-center gap-1"
+                disabled={isSending}
               >
-                <Send size={16} />
-                Invia email di prova
+                {isSending ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Invio in corso...
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    Invia email di prova
+                  </>
+                )}
               </Button>
               <Button onClick={handleSave}>Salva impostazioni</Button>
             </div>
