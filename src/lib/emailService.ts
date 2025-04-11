@@ -4,7 +4,13 @@ import { EmailSettings, EmailTestResult } from './types';
 // Funzione per inviare email di test
 export const sendTestEmail = async (settings: EmailSettings): Promise<EmailTestResult> => {
   return new Promise((resolve) => {
-    console.log('Tentativo di invio email di test con le impostazioni:', settings);
+    console.log('Tentativo di invio email di test con le impostazioni:', {
+      ...settings,
+      smtp: {
+        ...settings.smtp,
+        password: '[NASCOSTA PER SICUREZZA]' // Password oscurata nei log
+      }
+    });
     
     // Verifichiamo che tutti i campi necessari siano compilati
     if (!settings.smtp.host || !settings.smtp.user || !settings.smtp.password || 
@@ -21,7 +27,7 @@ export const sendTestEmail = async (settings: EmailSettings): Promise<EmailTestR
     // Pertanto simuliamo una richiesta a un servizio esterno usando setTimeout
     setTimeout(() => {
       try {
-        // Logghiamo per debugging
+        // Logghiamo per debugging (senza la password)
         console.log(`Simulazione invio email: da ${settings.senderEmail} a ${settings.recipientEmail} via ${settings.smtp.host}:${settings.smtp.port}`);
         console.log('Corpo email di test:', `
           Oggetto: Test email da Ethical Tech Digest
@@ -65,7 +71,13 @@ export const sendTestEmail = async (settings: EmailSettings): Promise<EmailTestR
 export const sendWeeklyDigest = async (settings: EmailSettings): Promise<EmailTestResult> => {
   // Implementazione simile alla precedente, ma per inviare il riepilogo settimanale
   return new Promise((resolve) => {
-    console.log('Invio riepilogo settimanale con le impostazioni:', settings);
+    console.log('Invio riepilogo settimanale con le impostazioni:', {
+      ...settings,
+      smtp: {
+        ...settings.smtp,
+        password: '[NASCOSTA PER SICUREZZA]' // Password oscurata nei log
+      }
+    });
 
     // Verifichiamo che tutti i campi necessari siano compilati
     if (!settings.smtp.host || !settings.smtp.user || !settings.smtp.password || 
@@ -79,7 +91,7 @@ export const sendWeeklyDigest = async (settings: EmailSettings): Promise<EmailTe
 
     setTimeout(() => {
       try {
-        // Logghiamo per debugging
+        // Logghiamo per debugging (senza la password)
         console.log(`Simulazione invio riepilogo settimanale: da ${settings.senderEmail} a ${settings.recipientEmail}`);
         
         // In ambiente di produzione, questa chiamata dovrebbe essere inviata a un servizio backend
@@ -107,7 +119,13 @@ export const sendWeeklyDigest = async (settings: EmailSettings): Promise<EmailTe
 // Funzione di utilità per verificare la connessione SMTP
 export const testSmtpConnection = async (settings: EmailSettings): Promise<EmailTestResult> => {
   return new Promise((resolve) => {
-    console.log('Test di connessione SMTP con le impostazioni:', settings);
+    console.log('Test di connessione SMTP con le impostazioni:', {
+      ...settings,
+      smtp: {
+        ...settings.smtp,
+        password: '[NASCOSTA PER SICUREZZA]' // Password oscurata nei log
+      }
+    });
     
     // Verifichiamo i campi di base
     if (!settings.smtp.host || !settings.smtp.port) {

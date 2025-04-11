@@ -45,6 +45,10 @@ if (empty($settings['smtp']['host']) ||
 
 // Funzione per inviare email
 function sendEmail($settings, $subject, $body) {
+    // Occultiamo la password nei log per sicurezza
+    $logSettings = $settings;
+    $logSettings['smtp']['password'] = '[NASCOSTA PER SICUREZZA]';
+    
     $smtpHost = $settings['smtp']['host'];
     $smtpPort = $settings['smtp']['port'];
     $smtpUser = $settings['smtp']['user'];
@@ -59,7 +63,7 @@ function sendEmail($settings, $subject, $body) {
     $headers .= "From: Ethical Tech Digest <$senderEmail>\r\n";
     $headers .= "Reply-To: $senderEmail\r\n";
     
-    // Log per debug
+    // Log per debug (senza password)
     error_log("Tentativo di invio email da $senderEmail a $recipientEmail tramite $smtpHost:$smtpPort");
     
     // Configura le opzioni SMTP per PHPMailer con controlli di sicurezza
