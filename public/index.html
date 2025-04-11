@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow">
+    <title>Ethical Tech Digest - Le notizie sui risvolti etici delle nuove tecnologie</title>
+    <meta name="description" content="Widget informativo sulle notizie più rilevanti riguardanti i risvolti etici di AI, Robotica e Biotecnologia" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    
+    <!-- Preconnect domini esterni -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Script per la comunicazione con la pagina host -->
+    <script>
+      // Invia l'altezza del contenuto alla pagina host
+      function updateHeight() {
+        const height = document.body.scrollHeight;
+        window.parent.postMessage({ type: 'resize', height: height }, '*');
+      }
+      
+      // Aggiorna l'altezza quando il contenuto cambia
+      window.addEventListener('load', updateHeight);
+      window.addEventListener('resize', updateHeight);
+      
+      // Controlla periodicamente se l'altezza è cambiata (per contenuti dinamici)
+      setInterval(updateHeight, 500);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

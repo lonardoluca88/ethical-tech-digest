@@ -1,73 +1,107 @@
-# Welcome to your Lovable project
 
-## Project info
+# Ethical Tech Digest Widget
 
-**URL**: https://lovable.dev/projects/7494116c-d2b9-4884-8534-fcbd9b8facfa
+Questo repository contiene il codice sorgente del widget Ethical Tech Digest, progettato per visualizzare notizie sui risvolti etici delle nuove tecnologie.
 
-## How can I edit this code?
+## Struttura del progetto
 
-There are several ways of editing your application.
+- `src/`: Codice sorgente React dell'applicazione
+- `public/`: File statici e widget standalone
+- `public/widget/`: Script per l'incorporamento del widget in altri siti
 
-**Use Lovable**
+## Deployment
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/7494116c-d2b9-4884-8534-fcbd9b8facfa) and start prompting.
+### Prerequisiti
 
-Changes made via Lovable will be committed automatically to this repo.
+- Accesso FTP al server web
+- Sottodominio configurato (es. `https://leonardo2030.entourage-di-kryon.it/lovablenews`)
 
-**Use your preferred IDE**
+### Istruzioni per il deployment
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Costruisci l'applicazione per la produzione:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+2. Carica tutti i file dalla directory `dist/` nella root del sottodominio tramite FileZilla
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Assicurati che il server web sia configurato per gestire le SPA (Single-Page Applications):
+   
+   Per Apache, crea o modifica un file `.htaccess` nella root con:
+   
+   ```
+   <IfModule mod_rewrite.c>
+     RewriteEngine On
+     RewriteBase /
+     RewriteRule ^index\.html$ - [L]
+     RewriteCond %{REQUEST_FILENAME} !-f
+     RewriteCond %{REQUEST_FILENAME} !-d
+     RewriteRule . /index.html [L]
+   </IfModule>
+   ```
 
-**Use GitHub Codespaces**
+   Per Nginx, configura il server block come:
+   
+   ```
+   location / {
+     try_files $uri $uri/ /index.html;
+   }
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+4. Verifica che il widget funzioni aprendo il sottodominio nel browser
 
-## What technologies are used for this project?
+### Test del widget incorporato
 
-This project is built with:
+Per testare l'incorporamento del widget in altri siti:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Crea una pagina HTML di test con il seguente codice:
 
-## How can I deploy this project?
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Widget</title>
+  <style>body { max-width: 1000px; margin: 0 auto; padding: 20px; }</style>
+</head>
+<body>
+  <h1>Test del Widget Ethical Tech Digest</h1>
+  
+  <div id="ethical-tech-digest"></div>
+  <script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"></script>
+</body>
+</html>
+```
 
-Simply open [Lovable](https://lovable.dev/projects/7494116c-d2b9-4884-8534-fcbd9b8facfa) and click on Share -> Publish.
+2. Apri questo file HTML in un browser per verificare che il widget venga caricato correttamente
 
-## Can I connect a custom domain to my Lovable project?
+## Configurazione dell'invio email
 
-Yes it is!
+Per implementare l'invio effettivo di email in ambiente di produzione:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. Crea un endpoint API sul tuo server che utilizzi una libreria server-side per l'invio di email (come Nodemailer per Node.js)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+2. Modifica il file `emailService.ts` per effettuare chiamate a questo endpoint invece di simulare l'invio
+
+3. Implementa la sicurezza necessaria per proteggere le credenziali SMTP
+
+## Guida all'installazione
+
+Una guida utente dettagliata è disponibile all'indirizzo:
+
+```
+https://leonardo2030.entourage-di-kryon.it/lovablenews/guide.html
+```
+
+## Amministrazione
+
+Il pannello di amministrazione è accessibile all'indirizzo:
+
+```
+https://leonardo2030.entourage-di-kryon.it/lovablenews/admin
+```
+
+## Supporto
+
+Per assistenza o informazioni aggiuntive, contatta:
+supporto@entourage-di-kryon.it

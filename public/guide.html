@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ethical Tech Digest - Guida all'installazione</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 { color: #2563eb; margin-bottom: 30px; }
+    h2 { color: #4b5563; margin-top: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+    code {
+      background-color: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: Monaco, monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background-color: #f3f4f6;
+      padding: 15px;
+      border-radius: 8px;
+      overflow: auto;
+      font-family: Monaco, monospace;
+      font-size: 0.9em;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background: #f9fafb;
+    }
+    .success {
+      color: #047857;
+      display: none;
+      margin-left: 5px;
+    }
+    .note {
+      background-color: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 10px 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .warning {
+      background-color: #fff7ed;
+      border-left: 4px solid #f97316;
+      padding: 10px 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+      border-color: #2563eb;
+      color: #2563eb;
+      font-weight: 500;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .step {
+      margin-bottom: 25px;
+    }
+    .step-number {
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+      width: 24px;
+      height: 24px;
+      text-align: center;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ethical Tech Digest - Guida all'installazione</h1>
+  
+  <p>Questa guida ti aiuterà a installare il widget Ethical Tech Digest sul tuo sito web o piattaforma Kajabi.</p>
+  
+  <div class="tabs">
+    <div class="tab active" data-tab="kajabi">Kajabi</div>
+    <div class="tab" data-tab="wordpress">WordPress</div>
+    <div class="tab" data-tab="html">Sito HTML</div>
+    <div class="tab" data-tab="config">Configurazione</div>
+  </div>
+  
+  <div class="tab-content active" id="kajabi-content">
+    <h2>Installazione su Kajabi</h2>
+    
+    <div class="step">
+      <p><span class="step-number">1</span> <strong>Accedi a Kajabi</strong> e vai al pannello di amministrazione.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">2</span> <strong>Scegli la pagina</strong> in cui vuoi inserire il widget.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">3</span> <strong>Aggiungi un blocco HTML personalizzato</strong> alla pagina.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">4</span> <strong>Copia il codice di incorporamento</strong> qui sotto e incollalo nel blocco HTML.</p>
+      
+      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest"&gt;&lt;/div&gt;
+&lt;script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">5</span> <strong>Salva le modifiche</strong> e pubblica la pagina.</p>
+    </div>
+  </div>
+  
+  <div class="tab-content" id="wordpress-content">
+    <h2>Installazione su WordPress</h2>
+    
+    <div class="step">
+      <p><span class="step-number">1</span> <strong>Accedi al dashboard</strong> di WordPress.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">2</span> <strong>Crea o modifica una pagina</strong> dove vuoi inserire il widget.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">3</span> <strong>Aggiungi un blocco Personalizzato HTML</strong> alla pagina.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">4</span> <strong>Copia il codice di incorporamento</strong> qui sotto e incollalo nell'editor HTML.</p>
+      
+      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest"&gt;&lt;/div&gt;
+&lt;script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">5</span> <strong>Salva e pubblica</strong> le modifiche.</p>
+    </div>
+    
+    <div class="note">
+      <strong>Nota:</strong> Se stai utilizzando un builder di pagine come Elementor, Divi o Beaver Builder, aggiungi un elemento HTML o codice personalizzato e incolla il codice di incorporamento in quello.
+    </div>
+  </div>
+  
+  <div class="tab-content" id="html-content">
+    <h2>Installazione su sito HTML</h2>
+    
+    <div class="step">
+      <p><span class="step-number">1</span> <strong>Apri il file HTML</strong> della pagina in cui vuoi inserire il widget.</p>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">2</span> <strong>Aggiungi il seguente codice</strong> nel punto in cui desideri visualizzare il widget:</p>
+      
+      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest"&gt;&lt;/div&gt;
+&lt;script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+    
+    <div class="step">
+      <p><span class="step-number">3</span> <strong>Salva il file e carica</strong> le modifiche sul tuo server web.</p>
+    </div>
+    
+    <div class="note">
+      <strong>Consiglio:</strong> Inserisci il codice all'interno di un elemento container per controllare meglio la larghezza e l'aspetto del widget.
+    </div>
+  </div>
+  
+  <div class="tab-content" id="config-content">
+    <h2>Opzioni di configurazione</h2>
+    
+    <p>È possibile personalizzare il widget utilizzando attributi dati nell'elemento contenitore:</p>
+    
+    <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest" 
+  data-theme="light" 
+  data-categories="ai,robotics,biotech"&gt;
+&lt;/div&gt;</code></pre>
+    
+    <h3>Opzioni disponibili:</h3>
+    
+    <ul>
+      <li><code>data-theme</code>: Imposta il tema del widget ("light" o "dark")</li>
+      <li><code>data-categories</code>: Specifica le categorie da visualizzare inizialmente (separate da virgola)</li>
+    </ul>
+    
+    <div class="warning">
+      <strong>Importante:</strong> L'ID "ethical-tech-digest" è obbligatorio e non deve essere modificato.
+    </div>
+  </div>
+  
+  <h2>Amministrazione del widget</h2>
+  
+  <p>Per gestire il contenuto del widget, accedi al pannello di amministrazione:</p>
+  
+  <p><a href="https://leonardo2030.entourage-di-kryon.it/lovablenews/admin" target="_blank">https://leonardo2030.entourage-di-kryon.it/lovablenews/admin</a></p>
+  
+  <p>Da qui potrai:</p>
+  <ul>
+    <li>Aggiungere, modificare o rimuovere notizie</li>
+    <li>Gestire le fonti delle notizie</li>
+    <li>Personalizzare l'aspetto del widget</li>
+    <li>Configurare le notifiche email settimanali</li>
+  </ul>
+  
+  <h2>Supporto</h2>
+  
+  <p>Per assistenza o informazioni aggiuntive, contatta:</p>
+  <p>Email: supporto@entourage-di-kryon.it</p>
+
+  <script>
+    // Script per la funzionalità delle schede
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          
+          // Attiva la scheda
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Mostra il contenuto della scheda
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          document.getElementById(`${tabId}-content`).classList.add('active');
+        });
+      });
+      
+      // Funzionalità copia
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const preEl = btn.closest('pre');
+          const codeEl = preEl.querySelector('code');
+          const successEl = preEl.querySelector('.success');
+          
+          navigator.clipboard.writeText(codeEl.textContent).then(() => {
+            successEl.style.display = 'inline';
+            setTimeout(() => {
+              successEl.style.display = 'none';
+            }, 2000);
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>

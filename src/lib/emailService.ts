@@ -1,6 +1,5 @@
 
 import { EmailSettings, EmailTestResult } from './types';
-import nodemailer from 'nodemailer';
 
 // Funzione per inviare email di test
 export const sendTestEmail = async (settings: EmailSettings): Promise<EmailTestResult> => {
@@ -19,7 +18,7 @@ export const sendTestEmail = async (settings: EmailSettings): Promise<EmailTestR
     }
 
     // In un'applicazione front-end, non possiamo usare direttamente nodemailer
-    // Pertanto simuliamo una richiesta a un servizio esterno usando fetch
+    // Pertanto simuliamo una richiesta a un servizio esterno usando setTimeout
     setTimeout(() => {
       try {
         // Logghiamo per debugging
@@ -39,10 +38,17 @@ export const sendTestEmail = async (settings: EmailSettings): Promise<EmailTestR
           ---------------------------------------
         `);
         
-        // Simuliamo una risposta di successo
+        // In ambiente di produzione, questa chiamata dovrebbe essere inviata a un servizio backend
+        // che gestisce l'invio effettivo dell'email tramite un server SMTP
+        // fetch('https://api.tuodominio.it/send-email', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ settings, type: 'test' })
+        // });
+        
         resolve({
           success: true,
-          message: `Email di test inviata con successo da ${settings.senderEmail} a ${settings.recipientEmail}\n\nNota: In un'applicazione reale, questa richiesta verrebbe gestita da un'API sul server. In questa versione di demo, l'invio è simulato.`
+          message: `Email di test inviata con successo da ${settings.senderEmail} a ${settings.recipientEmail}\n\nNota: In questa versione di demo, l'invio è simulato. Per l'invio reale, configura un servizio backend sul tuo dominio.`
         });
       } catch (error) {
         console.error('Errore durante la simulazione dell\'invio dell\'email:', error);
@@ -75,6 +81,13 @@ export const sendWeeklyDigest = async (settings: EmailSettings): Promise<EmailTe
       try {
         // Logghiamo per debugging
         console.log(`Simulazione invio riepilogo settimanale: da ${settings.senderEmail} a ${settings.recipientEmail}`);
+        
+        // In ambiente di produzione, questa chiamata dovrebbe essere inviata a un servizio backend
+        // fetch('https://api.tuodominio.it/send-email', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ settings, type: 'weekly-digest' })
+        // });
         
         resolve({
           success: true,
@@ -109,9 +122,16 @@ export const testSmtpConnection = async (settings: EmailSettings): Promise<Email
       // Questo è un test simulato - in un'applicazione reale si testerebbe l'effettiva connessione
       console.log(`Test connessione SMTP a ${settings.smtp.host}:${settings.smtp.port}`);
       
+      // In ambiente di produzione, questa chiamata dovrebbe verificare la connessione tramite un servizio backend
+      // fetch('https://api.tuodominio.it/test-smtp', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ settings })
+      // });
+      
       resolve({
         success: true,
-        message: `Connessione SMTP a ${settings.smtp.host}:${settings.smtp.port} verificata con successo.`
+        message: `Connessione SMTP a ${settings.smtp.host}:${settings.smtp.port} verificata con successo.\n\nNota: In questa versione di demo, il test è simulato. Per un test reale, configura un servizio backend.`
       });
     }, 1000);
   });
