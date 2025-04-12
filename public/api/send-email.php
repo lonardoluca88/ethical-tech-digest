@@ -5,17 +5,37 @@ header('Access-Control-Allow-Origin: https://leonardo2030.entourage-di-kryon.it'
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+// Attiva il logging degli errori
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+$logFile = __DIR__ . '/email_log.txt';
+
+// Funzione per il log
+function writeLog($message) {
+  global $logFile;
+  $timestamp = date('[Y-m-d H:i:s]');
+  file_put_contents($logFile, "$timestamp $message" . PHP_EOL, FILE_APPEND);
+}
+
+writeLog("Richiesta ricevuta");
+
 // Risposta in caso di metodo non valido
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
+    writeLog("Metodo non consentito: " . $_SERVER['REQUEST_METHOD']);
     echo json_encode(['success' => false, 'message' => 'Metodo non consentito']);
     exit;
 }
 
 // Legge i dati JSON dalla richiesta
-$data = json_decode(file_get_contents('php://input'), true);
+$input = file_get_contents('php://input');
+writeLog("Input ricevuto: " . substr($input, 0, 1000) . "...");
+
+$data = json_decode($input, true);
 if (!$data) {
     http_response_code(400);
+    writeLog("Dati JSON non validi");
     echo json_encode(['success' => false, 'message' => 'Dati non validi']);
     exit;
 }
@@ -26,6 +46,7 @@ $type = $data['type'] ?? null;
 
 if (!$settings || !$type) {
     http_response_code(400);
+    writeLog("Parametri mancanti: settings o type non forniti");
     echo json_encode(['success' => false, 'message' => 'Parametri mancanti']);
     exit;
 }
@@ -39,15 +60,19 @@ if (empty($settings['smtp']['host']) ||
     empty($settings['recipientEmail'])) {
     
     http_response_code(400);
+    writeLog("Dati SMTP incompleti");
     echo json_encode(['success' => false, 'message' => 'Dati SMTP incompleti']);
     exit;
 }
 
 // Funzione per inviare email
 function sendEmail($settings, $subject, $body) {
+    global $logFile;
+    
     // Occultiamo la password nei log per sicurezza
     $logSettings = $settings;
     $logSettings['smtp']['password'] = '[NASCOSTA PER SICUREZZA]';
+    writeLog("Tentativo di invio email con impostazioni: " . json_encode($logSettings));
     
     $smtpHost = $settings['smtp']['host'];
     $smtpPort = $settings['smtp']['port'];
@@ -64,20 +89,22 @@ function sendEmail($settings, $subject, $body) {
     $headers .= "Reply-To: $senderEmail\r\n";
     
     // Log per debug (senza password)
-    error_log("Tentativo di invio email da $senderEmail a $recipientEmail tramite $smtpHost:$smtpPort");
+    writeLog("Tentativo di invio email da $senderEmail a $recipientEmail tramite $smtpHost:$smtpPort");
     
     // Configura le opzioni SMTP per PHPMailer con controlli di sicurezza
     $smtpOptions = "-f$senderEmail";
     
-    // Tentativo di invio
+    // In un ambiente di produzione, dovresti utilizzare PHPMailer o simili
+    // Per ora usiamo la funzione mail di PHP
     $result = mail($recipientEmail, $subject, $body, $headers, $smtpOptions);
     
     // Log del risultato
     if ($result) {
-        error_log("Email inviata con successo a $recipientEmail");
+        writeLog("Email inviata con successo a $recipientEmail");
         return true;
     } else {
-        error_log("Errore nell'invio dell'email a $recipientEmail: " . error_get_last()['message']);
+        $error = error_get_last();
+        writeLog("Errore nell'invio dell'email a $recipientEmail: " . ($error ? $error['message'] : 'Errore sconosciuto'));
         return false;
     }
 }
@@ -125,24 +152,29 @@ if ($type === 'test') {
     $success = sendEmail($settings, $subject, $body);
     
     if ($success) {
+        writeLog("Email di test inviata con successo");
         echo json_encode(['success' => true, 'message' => 'Email di test inviata con successo']);
     } else {
         http_response_code(500);
+        writeLog("Errore nell'invio dell'email di test");
         echo json_encode(['success' => false, 'message' => 'Errore nell\'invio dell\'email di test']);
     }
 } elseif ($type === 'weekly-digest') {
     // Qui implementeresti la generazione del contenuto del digest settimanale
     // e l'invio effettivo utilizzando la stessa funzione sendEmail
+    writeLog("Richiesta di invio digest settimanale");
     
     // Per questo esempio, simuliamo che il digest sia stato inviato con successo
     echo json_encode(['success' => true, 'message' => 'Digest settimanale inviato con successo']);
 } elseif ($type === 'test-connection') {
     // Qui verificheresti la connessione SMTP senza inviare un'email effettiva
+    writeLog("Richiesta di test connessione SMTP");
     
     // Per semplicità, simuliamo una connessione riuscita
     echo json_encode(['success' => true, 'message' => 'Connessione SMTP verificata con successo']);
 } else {
     http_response_code(400);
+    writeLog("Tipo di richiesta non supportato: $type");
     echo json_encode(['success' => false, 'message' => 'Tipo di richiesta non supportato']);
 }
 ?>
