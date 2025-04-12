@@ -33,6 +33,17 @@
       border-radius: 4px;
       font-family: monospace;
     }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .debug-info {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -48,7 +59,23 @@
   <div class="container">
     <h2>Widget Demo:</h2>
     <div id="ethical-tech-digest" data-theme="light" data-categories="ai,robotics,biotech"></div>
-    <script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"></script>
+    <script src="ethical-tech-digest.js"></script>
+    
+    <div class="debug-info">
+      <h3>Debug Info:</h3>
+      <div id="widget-debug"></div>
+      <script>
+        // Aggiungi info di debug
+        document.addEventListener('DOMContentLoaded', function() {
+          const debugDiv = document.getElementById('widget-debug');
+          setTimeout(() => {
+            const widgetContainer = document.getElementById('ethical-tech-digest');
+            debugDiv.innerHTML += '<p>Widget container height: ' + widgetContainer.offsetHeight + 'px</p>';
+            debugDiv.innerHTML += '<p>Widget container content: ' + widgetContainer.innerHTML + '</p>';
+          }, 2000);
+        });
+      </script>
+    </div>
   </div>
 </body>
 </html>
