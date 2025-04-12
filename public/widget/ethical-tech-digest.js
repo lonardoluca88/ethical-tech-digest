@@ -6,8 +6,23 @@
     categories: ['ai', 'robotics', 'biotech']
   };
   
+  // Logger personalizzato
+  const logger = {
+    info: function(msg, data) {
+      console.log(`[ETD Widget] ${msg}`, data || '');
+    },
+    error: function(msg, err) {
+      console.error(`[ETD Widget Error] ${msg}`, err || '');
+    },
+    warn: function(msg, data) {
+      console.warn(`[ETD Widget Warning] ${msg}`, data || '');
+    }
+  };
+  
   // Aggiungiamo uno status visibile all'utente
   function createStatusMessage(container, message, isError = false) {
+    logger.info(`Creazione messaggio di stato: ${message}, isError: ${isError}`);
+    
     const statusEl = document.createElement('div');
     statusEl.style.padding = '15px';
     statusEl.style.margin = '10px 0';
@@ -27,9 +42,6 @@
     statusEl.textContent = message;
     container.appendChild(statusEl);
     
-    // Log anche in console per debugging
-    console.log(`Widget status: ${message}`);
-    
     return statusEl;
   }
   
@@ -37,11 +49,12 @@
     // Trova il contenitore del widget
     const container = document.getElementById('ethical-tech-digest');
     if (!container) {
-      console.error('Ethical Tech Digest: nessun elemento con ID "ethical-tech-digest" trovato.');
+      logger.error('Nessun elemento con ID "ethical-tech-digest" trovato.');
       return;
     }
     
     // Mostra messaggio di caricamento
+    logger.info('Inizializzazione widget...');
     const statusEl = createStatusMessage(container, 'Caricamento del widget in corso...');
     
     try {
@@ -50,23 +63,36 @@
       const categoriesAttr = container.getAttribute('data-categories');
       const categories = categoriesAttr ? categoriesAttr.split(',') : defaultConfig.categories;
       
-      console.log('Configurazione widget:', { theme, categories });
+      logger.info('Configurazione widget:', { theme, categories });
       
       // Determina il percorso base in modo dinamico
       const scriptTags = document.getElementsByTagName('script');
       let baseUrl = 'https://leonardo2030.entourage-di-kryon.it/lovablenews/';
+      let scriptFound = false;
       
       // Cerca lo script corrente per determinare il baseUrl
       for (let i = 0; i < scriptTags.length; i++) {
         const src = scriptTags[i].src || '';
         if (src.includes('ethical-tech-digest.js')) {
           baseUrl = src.substring(0, src.lastIndexOf('/widget/')) + '/';
-          console.log('Base URL rilevato:', baseUrl);
+          logger.info('Base URL rilevato:', baseUrl);
+          scriptFound = true;
           break;
         }
       }
       
-      // Crea l'iframe con una fallback URL
+      if (!scriptFound) {
+        logger.warn('Script ethical-tech-digest.js non trovato nei tag script. Usando URL fallback.');
+      }
+      
+      // Aggiungiamo un messaggio di debug aggiuntivo
+      createStatusMessage(container, `Utilizzo base URL: ${baseUrl}`, false);
+      
+      // Memorizza la posizione attuale prima di creare l'iframe
+      const hostUrl = window.location.href;
+      logger.info('Host URL:', hostUrl);
+      
+      // Crea l'iframe
       const iframe = document.createElement('iframe');
       iframe.style.width = '100%';
       iframe.style.height = '600px';
@@ -81,11 +107,11 @@
       url.searchParams.append('categories', categories.join(','));
       url.searchParams.append('t', new Date().getTime()); // Previene caching
       
-      console.log('URL iframe:', url.toString());
+      logger.info('URL iframe:', url.toString());
       
       // Evento onload per l'iframe
       iframe.onload = function() {
-        console.log('iframe caricato con successo');
+        logger.info('iframe caricato con successo');
         // Rimuovi il messaggio di stato
         if (statusEl && statusEl.parentNode) {
           statusEl.parentNode.removeChild(statusEl);
@@ -94,9 +120,15 @@
       
       // Evento onerror per l'iframe
       iframe.onerror = function(err) {
-        console.error('Errore nel caricamento dell\'iframe:', err);
+        logger.error('Errore nel caricamento dell\'iframe:', err);
         createStatusMessage(container, 'Errore nel caricamento del widget. Per favore ricarica la pagina.', true);
       };
+      
+      // Debug info sul tipo di ambiente
+      if (window.location.href.includes('gpteng.co') || window.location.href.includes('lovableproject.com')) {
+        logger.info('Ambiente di sviluppo rilevato');
+        createStatusMessage(container, 'Ambiente di sviluppo rilevato. Il widget potrebbe comportarsi diversamente in produzione.', false);
+      }
       
       // Imposta l'attributo src dopo aver definito gli handler
       iframe.setAttribute('src', url.toString());
@@ -107,9 +139,10 @@
       // Gestisci il ridimensionamento dinamico dell'iframe
       window.addEventListener('message', function(event) {
         // Verifica l'origine se necessario
+        logger.info('Messaggio ricevuto:', event.data);
         
         if (event.data && event.data.type === 'resize' && event.data.height) {
-          console.log('Ricevuto evento resize:', event.data);
+          logger.info('Ricevuto evento resize:', event.data);
           iframe.style.height = event.data.height + 'px';
         }
       });
@@ -120,35 +153,74 @@
           // Prova ad accedere al contenuto dell'iframe per verificare se è stato caricato
           // Questo potrebbe fallire per la policy di same-origin
           const iframeContent = iframe.contentWindow.document;
-          console.log('Iframe verificato dopo timeout');
+          logger.info('Iframe verificato dopo timeout');
         } catch (e) {
-          console.log('Non posso verificare il contenuto dell\'iframe a causa della same-origin policy');
+          logger.info('Non posso verificare il contenuto dell\'iframe a causa della same-origin policy');
           
-          // Aggiungi un pulsante di fallback per ricaricare
-          const reloadBtn = document.createElement('button');
-          reloadBtn.textContent = 'Ricarica Widget';
-          reloadBtn.style.marginTop = '10px';
-          reloadBtn.style.padding = '8px 16px';
-          reloadBtn.style.backgroundColor = '#2563EB';
-          reloadBtn.style.color = 'white';
-          reloadBtn.style.border = 'none';
-          reloadBtn.style.borderRadius = '4px';
-          reloadBtn.style.cursor = 'pointer';
-          
-          reloadBtn.onclick = function() {
-            window.location.reload();
-          };
-          
-          if (!document.querySelector('.ethical-tech-reload-btn')) {
-            reloadBtn.className = 'ethical-tech-reload-btn';
-            container.appendChild(reloadBtn);
+          // Verifica visivamente se l'iframe ha contenuto
+          if (iframe.offsetHeight < 50) {
+            logger.warn('Iframe sembra vuoto (altezza < 50px)');
+            createStatusMessage(container, 'Il widget non sembra essere caricato correttamente. Prova con il metodo alternativo.', true);
+            
+            // Aggiungere pulsanti di azione
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.marginTop = '10px';
+            
+            // Pulsante per ricaricare
+            const reloadBtn = document.createElement('button');
+            reloadBtn.textContent = 'Riprova';
+            reloadBtn.style.marginRight = '10px';
+            reloadBtn.style.padding = '8px 16px';
+            reloadBtn.style.backgroundColor = '#2563EB';
+            reloadBtn.style.color = 'white';
+            reloadBtn.style.border = 'none';
+            reloadBtn.style.borderRadius = '4px';
+            reloadBtn.style.cursor = 'pointer';
+            
+            reloadBtn.onclick = function() {
+              window.reloadEthicalTechWidget();
+            };
+            
+            // Pulsante per metodo alternativo
+            const altBtn = document.createElement('button');
+            altBtn.textContent = 'Usa metodo alternativo';
+            altBtn.style.padding = '8px 16px';
+            altBtn.style.backgroundColor = '#6B7280';
+            altBtn.style.color = 'white';
+            altBtn.style.border = 'none';
+            altBtn.style.borderRadius = '4px';
+            altBtn.style.cursor = 'pointer';
+            
+            altBtn.onclick = function() {
+              if (typeof testAlternative === 'function') {
+                testAlternative();
+              } else {
+                const container = document.getElementById('ethical-tech-digest');
+                container.innerHTML = '<iframe src="' + baseUrl + '?theme=' + theme + '&categories=' + categories.join(',') + '" style="width:100%; height:600px; border:none;"></iframe>';
+              }
+            };
+            
+            actionsDiv.appendChild(reloadBtn);
+            actionsDiv.appendChild(altBtn);
+            container.appendChild(actionsDiv);
           }
         }
       }, 5000);
       
     } catch (error) {
-      console.error('Errore durante l\'inizializzazione del widget:', error);
+      logger.error('Errore durante l\'inizializzazione del widget:', error);
       createStatusMessage(container, 'Si è verificato un errore: ' + error.message, true);
+      
+      // Aggiungi info aggiuntive sull'errore
+      const errorDetails = document.createElement('pre');
+      errorDetails.style.backgroundColor = '#FEF2F2';
+      errorDetails.style.padding = '10px';
+      errorDetails.style.borderRadius = '4px';
+      errorDetails.style.fontSize = '12px';
+      errorDetails.style.overflow = 'auto';
+      errorDetails.style.maxHeight = '200px';
+      errorDetails.textContent = error.stack || 'Nessun dettaglio disponibile';
+      container.appendChild(errorDetails);
     }
   }
   

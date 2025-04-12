@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test Widget Ethical Tech Digest</title>
+  <!-- Script essenziale per il funzionamento del widget in ambiente di test -->
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -78,8 +80,10 @@
     <div class="action-buttons">
       <button onclick="reloadEthicalTechWidget()">Ricarica Widget</button>
       <button onclick="testAlternative()">Test Alternativo con iFrame</button>
+      <button onclick="checkWebsiteAccess()">Verifica Accesso al Sito</button>
     </div>
     
+    <!-- Widget Container -->
     <div id="ethical-tech-digest" data-theme="light" data-categories="ai,robotics,biotech"></div>
     <script src="ethical-tech-digest.js"></script>
     
@@ -102,6 +106,10 @@
             if (!widgetContainer.children.length) {
               debugDiv.innerHTML += '<p style="color: red">ATTENZIONE: Il container è vuoto!</p>';
             }
+            
+            // Aggiungi dettagli sull'ambiente
+            debugDiv.innerHTML += '<p>User Agent: ' + navigator.userAgent + '</p>';
+            debugDiv.innerHTML += '<p>URL corrente: ' + window.location.href + '</p>';
           }
           
           function escapeHTML(str) {
@@ -123,6 +131,28 @@
         function testAlternative() {
           const container = document.getElementById('ethical-tech-digest');
           container.innerHTML = '<iframe src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" style="width:100%; height:600px; border:none;"></iframe>';
+        }
+        
+        // Funzione per verificare l'accesso al sito
+        function checkWebsiteAccess() {
+          const container = document.getElementById('ethical-tech-digest');
+          container.innerHTML = '<div style="padding:15px; background-color:#f0f4f8; border:1px solid #d0d7de; border-radius:4px;">Verificando accesso al sito...</div>';
+          
+          // Funzione per verificare l'accesso
+          fetch('https://leonardo2030.entourage-di-kryon.it/lovablenews/', {
+            method: 'HEAD',
+            cache: 'no-cache'
+          })
+          .then(response => {
+            if (response.ok) {
+              container.innerHTML = '<div style="padding:15px; background-color:#ecfdf5; border:1px solid #a7f3d0; border-radius:4px; color:#065f46;">✓ Accesso al sito principale confermato!</div>';
+            } else {
+              container.innerHTML = '<div style="padding:15px; background-color:#fef2f2; border:1px solid #fecaca; border-radius:4px; color:#b91c1c;">✗ Risposta non valida dal server: ' + response.status + '</div>';
+            }
+          })
+          .catch(error => {
+            container.innerHTML = '<div style="padding:15px; background-color:#fef2f2; border:1px solid #fecaca; border-radius:4px; color:#b91c1c;">✗ Errore di connessione: ' + error.message + '</div>';
+          });
         }
       </script>
     </div>
