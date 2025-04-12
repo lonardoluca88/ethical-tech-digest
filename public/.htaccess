@@ -24,14 +24,32 @@
   ExpiresByType application/javascript "access plus 1 week"
 </IfModule>
 
-# Abilita CORS per il widget
+# Abilita CORS per il widget - Configurazione migliorata
 <IfModule mod_headers.c>
-  <FilesMatch "\.(js|css|html)$">
+  # Imposta CORS per tutti i file nella cartella widget
+  <FilesMatch "\.(js|html|css|json)$">
     Header set Access-Control-Allow-Origin "*"
     Header set Access-Control-Allow-Methods "GET, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
     Header set X-Content-Type-Options "nosniff"
   </FilesMatch>
+  
+  # Imposta header specifici per i file JS
+  <FilesMatch "\.js$">
+    Header set Content-Type "application/javascript; charset=UTF-8"
+  </FilesMatch>
+  
+  # Disabilita la cache per il debug durante lo sviluppo
+  <FilesMatch "(ethical-tech-digest\.js|example\.html)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+  </FilesMatch>
+</IfModule>
+
+# Compressione gzip per migliorare le prestazioni
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript
 </IfModule>
 
 # Imposta content-type per i file JavaScript
@@ -39,9 +57,4 @@
   AddType application/javascript .js
   AddType text/css .css
   AddType text/html .html
-</IfModule>
-
-# Compressione gzip per migliorare le prestazioni
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript text/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript
 </IfModule>

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Code, Copy, FileCode, FileJson, Check } from 'lucide-react';
+import { Code, Copy, FileCode, FileJson, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const InstallationGuide: React.FC = () => {
@@ -19,11 +19,12 @@ const InstallationGuide: React.FC = () => {
     }, 2000);
   };
   
-  const scriptEmbed = `<div id="ethical-tech-digest"></div>
-<script src="https://tuodominio.it/widget/ethical-tech-digest.js"></script>`;
+  // Aggiornato per utilizzare correttamente il metodo iframe che funziona
+  const scriptEmbed = `<div id="ethical-tech-digest" data-theme="light" data-categories="ai,robotics,biotech"></div>
+<script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"></script>`;
 
   const iframeEmbed = `<iframe 
-  src="https://tuodominio.it/widget/" 
+  src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
   width="100%" 
   height="800" 
   frameborder="0" 
@@ -60,7 +61,7 @@ const InstallationGuide: React.FC = () => {
           </ol>
         </div>
         
-        <Tabs defaultValue="script">
+        <Tabs defaultValue="iframe">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="script" className="flex items-center gap-1">
               <Code size={16} />
@@ -68,7 +69,7 @@ const InstallationGuide: React.FC = () => {
             </TabsTrigger>
             <TabsTrigger value="iframe" className="flex items-center gap-1">
               <FileCode size={16} />
-              iFrame
+              iFrame (consigliato)
             </TabsTrigger>
           </TabsList>
           
@@ -86,9 +87,12 @@ const InstallationGuide: React.FC = () => {
                 {copied === 'script' ? <Check size={18} /> : <Copy size={18} />}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Questo metodo carica il widget come uno script JavaScript ed è la soluzione consigliata.
-            </p>
+            <div className="flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-md mt-2">
+              <AlertTriangle size={16} className="text-amber-600" />
+              <p className="text-sm text-amber-800">
+                Il metodo script potrebbe non funzionare in tutti gli ambienti. In caso di problemi, usa il metodo iFrame.
+              </p>
+            </div>
           </TabsContent>
           
           <TabsContent value="iframe" className="mt-4">
@@ -105,9 +109,12 @@ const InstallationGuide: React.FC = () => {
                 {copied === 'iframe' ? <Check size={18} /> : <Copy size={18} />}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              L'iFrame è un'alternativa più semplice, ma potrebbe offrire meno integrazione con la pagina host.
-            </p>
+            <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-md mt-2">
+              <Check size={16} className="text-green-600" />
+              <p className="text-sm text-green-800">
+                Metodo consigliato: l'iFrame è più affidabile e funziona in tutti gli ambienti.
+              </p>
+            </div>
           </TabsContent>
         </Tabs>
         
@@ -120,29 +127,43 @@ const InstallationGuide: React.FC = () => {
             Per personalizzare ulteriormente il widget, puoi aggiungere queste opzioni di configurazione:
           </p>
           <pre className="bg-white p-3 rounded border border-blue-100 text-sm overflow-auto">
-            <code>{`<div id="ethical-tech-digest" 
+            <code>{`<!-- Per il metodo script -->
+<div id="ethical-tech-digest" 
   data-theme="light" 
   data-categories="ai,robotics,biotech">
-</div>`}</code>
+</div>
+
+<!-- Per il metodo iFrame -->
+<iframe src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" ...`}</code>
           </pre>
           <ul className="text-sm text-blue-600 mt-3 space-y-1">
-            <li><code>data-theme</code>: "light" o "dark" per adattarsi al tema del tuo sito</li>
-            <li><code>data-categories</code>: limita le categorie mostrate inizialmente</li>
+            <li><code>theme</code>: "light" o "dark" per adattarsi al tema del tuo sito</li>
+            <li><code>categories</code>: limita le categorie mostrate inizialmente</li>
           </ul>
         </div>
         
         <div>
-          <h3 className="text-lg font-medium mb-2">Caricamento tramite FTP</h3>
-          <p className="text-muted-foreground mb-3">
-            Se preferisci ospitare il widget su un tuo sottodominio, ecco come fare:
-          </p>
-          <ol className="list-decimal pl-5 space-y-2 text-sm">
-            <li>Scarica tutti i file generati dal widget</li>
-            <li>Crea un sottodominio (es. <code>widget.tuodominio.it</code>) dal tuo pannello hosting</li>
-            <li>Utilizza FileZilla per connetterti al tuo server FTP</li>
-            <li>Carica tutti i file nella directory del sottodominio</li>
-            <li>Aggiorna gli URL nei codici di incorporamento con il tuo sottodominio</li>
-          </ol>
+          <h3 className="text-lg font-medium mb-2">Risoluzione problemi comuni</h3>
+          <ul className="space-y-2">
+            <li className="flex items-start gap-2">
+              <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
+              <p className="text-sm">
+                <strong>Widget non visibile:</strong> Se il widget non appare, prova ad utilizzare il metodo iFrame che è più affidabile.
+              </p>
+            </li>
+            <li className="flex items-start gap-2">
+              <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
+              <p className="text-sm">
+                <strong>CSS in conflitto:</strong> Se il layout appare distorto, potrebbe esserci un conflitto CSS con il tuo sito. L'iFrame isola questi problemi.
+              </p>
+            </li>
+            <li className="flex items-start gap-2">
+              <AlertTriangle size={18} className="text-amber-600 mt-0.5" />
+              <p className="text-sm">
+                <strong>Altezza non corretta:</strong> Se l'altezza dell'iFrame non è sufficiente, aumentala modificando il valore <code>height="800"</code>.
+              </p>
+            </li>
+          </ul>
         </div>
       </div>
     </Card>

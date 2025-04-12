@@ -62,6 +62,22 @@
     button:hover {
       background-color: #1D4ED8;
     }
+    .success-message {
+      background-color: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      color: #065F46;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .error-message {
+      background-color: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #B91C1C;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
   </style>
 </head>
 <body>
@@ -83,6 +99,8 @@
       <button onclick="checkWebsiteAccess()">Verifica Accesso al Sito</button>
     </div>
     
+    <div id="status-messages"></div>
+    
     <!-- Widget Container -->
     <div id="ethical-tech-digest" data-theme="light" data-categories="ai,robotics,biotech"></div>
     <script src="ethical-tech-digest.js"></script>
@@ -94,6 +112,7 @@
         // Aggiungi info di debug
         document.addEventListener('DOMContentLoaded', function() {
           const debugDiv = document.getElementById('widget-debug');
+          const statusMessages = document.getElementById('status-messages');
           
           function updateDebugInfo() {
             const widgetContainer = document.getElementById('ethical-tech-digest');
@@ -127,16 +146,23 @@
           setInterval(updateDebugInfo, 5000);
         });
         
-        // Funzione per test alternativo
+        // Funzione per test alternativo usando direttamente iframe
         function testAlternative() {
           const container = document.getElementById('ethical-tech-digest');
+          const statusMessages = document.getElementById('status-messages');
+          
           container.innerHTML = '<iframe src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" style="width:100%; height:600px; border:none;"></iframe>';
+          
+          // Mostra messaggio di successo
+          statusMessages.innerHTML = '<div class="success-message">Caricamento con iframe diretto</div>';
         }
         
         // Funzione per verificare l'accesso al sito
         function checkWebsiteAccess() {
           const container = document.getElementById('ethical-tech-digest');
-          container.innerHTML = '<div style="padding:15px; background-color:#f0f4f8; border:1px solid #d0d7de; border-radius:4px;">Verificando accesso al sito...</div>';
+          const statusMessages = document.getElementById('status-messages');
+          
+          statusMessages.innerHTML = '<div>Verificando accesso al sito...</div>';
           
           // Funzione per verificare l'accesso
           fetch('https://leonardo2030.entourage-di-kryon.it/lovablenews/', {
@@ -145,17 +171,27 @@
           })
           .then(response => {
             if (response.ok) {
-              container.innerHTML = '<div style="padding:15px; background-color:#ecfdf5; border:1px solid #a7f3d0; border-radius:4px; color:#065f46;">✓ Accesso al sito principale confermato!</div>';
+              statusMessages.innerHTML = '<div class="success-message">✓ Accesso al sito principale confermato!</div>';
             } else {
-              container.innerHTML = '<div style="padding:15px; background-color:#fef2f2; border:1px solid #fecaca; border-radius:4px; color:#b91c1c;">✗ Risposta non valida dal server: ' + response.status + '</div>';
+              statusMessages.innerHTML = '<div class="error-message">✗ Risposta non valida dal server: ' + response.status + '</div>';
             }
           })
           .catch(error => {
-            container.innerHTML = '<div style="padding:15px; background-color:#fef2f2; border:1px solid #fecaca; border-radius:4px; color:#b91c1c;">✗ Errore di connessione: ' + error.message + '</div>';
+            statusMessages.innerHTML = '<div class="error-message">✗ Errore di connessione: ' + error.message + '</div>';
           });
         }
       </script>
     </div>
+  </div>
+  
+  <div class="instructions" style="margin-top: 30px;">
+    <h3>Suggerimenti per la risoluzione dei problemi:</h3>
+    <ul>
+      <li>Se il widget non si carica con il metodo standard, utilizzare il metodo alternativo con iFrame.</li>
+      <li>Verificare che il file .htaccess sia configurato correttamente per gestire le richieste CORS.</li>
+      <li>Controllare la console del browser per eventuali errori JavaScript.</li>
+      <li>Assicurarsi che tutti i file necessari siano stati caricati sul server.</li>
+    </ul>
   </div>
 </body>
 </html>
