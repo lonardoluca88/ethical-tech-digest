@@ -1,10 +1,11 @@
 
 /**
- * Ethical Tech Digest Widget Loader
- *
- * @copyright   Copyright (C) 2025 All rights reserved.
- * @license     GNU General Public License version 2 or later;
+ * Ethical Tech Digest Widget JavaScript
+ * 
+ * @package    mod_ethical_tech_digest
+ * @copyright  Copyright (C) 2025 All rights reserved.
  */
+
 (function() {
   // Configurazione widget
   const defaultConfig = {
@@ -19,30 +20,24 @@
     },
     error: function(msg, err) {
       console.error(`[ETD Widget Error] ${msg}`, err || '');
-    },
-    warn: function(msg, data) {
-      console.warn(`[ETD Widget Warning] ${msg}`, data || '');
     }
   };
   
-  // Funzione per caricare il widget
-  window.loadEthicalTechWidget = function(containerId, options = {}) {
+  function loadWidget(containerId) {
+    // Trova il contenitore del widget
     const container = document.getElementById(containerId);
     if (!container) {
-      logger.error(`Nessun elemento con ID "${containerId}" trovato.`);
+      logger.error('Contenitore non trovato: ' + containerId);
       return;
     }
     
     try {
       // Leggi la configurazione
-      const theme = options.theme || container.getAttribute('data-theme') || defaultConfig.theme;
-      const categoriesAttr = options.categories || container.getAttribute('data-categories');
+      const theme = container.getAttribute('data-theme') || defaultConfig.theme;
+      const categoriesAttr = container.getAttribute('data-categories');
       const categories = categoriesAttr ? categoriesAttr.split(',') : defaultConfig.categories;
-      const height = options.height || '600';
       
-      logger.info('Configurazione widget:', { theme, categories, height });
-      
-      // Determina la base URL
+      // Base URL del widget
       const baseUrl = 'https://leonardo2030.entourage-di-kryon.it/lovablenews/';
       
       // Costruisci l'URL con i parametri di configurazione
@@ -51,10 +46,10 @@
       url.searchParams.append('categories', categories.join(','));
       url.searchParams.append('t', new Date().getTime()); // Previene caching
       
-      // Crea l'iframe
+      // IMPORTANTE: Utilizzo diretto del metodo iframe che funziona nei test
       const iframe = document.createElement('iframe');
       iframe.style.width = '100%';
-      iframe.style.height = height + 'px';
+      iframe.style.height = '600px';
       iframe.style.border = 'none';
       iframe.style.overflow = 'hidden';
       iframe.setAttribute('title', 'Ethical Tech Digest');
@@ -65,11 +60,31 @@
       container.innerHTML = '';
       container.appendChild(iframe);
       
-      return iframe;
     } catch (error) {
       logger.error('Errore durante l\'inizializzazione del widget:', error);
       container.innerHTML = '<div style="padding:15px; background-color:#FEE2E2; border:1px solid #F87171; border-radius:4px; color:#B91C1C;">Impossibile caricare il widget. Per favore ricarica la pagina.</div>';
-      return null;
+    }
+  }
+  
+  // Esponi funzione globale per permettere l'inizializzazione manuale
+  window.initEthicalTechWidget = function(containerId) {
+    if (containerId) {
+      loadWidget(containerId);
+    } else {
+      // Cerca tutti i contenitori con classe 'ethical-tech-digest-widget'
+      const containers = document.querySelectorAll('.ethical-tech-digest-widget');
+      containers.forEach(container => {
+        loadWidget(container.id);
+      });
     }
   };
+  
+  // Inizializza automaticamente quando il DOM è pronto
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      window.initEthicalTechWidget();
+    });
+  } else {
+    window.initEthicalTechWidget();
+  }
 })();

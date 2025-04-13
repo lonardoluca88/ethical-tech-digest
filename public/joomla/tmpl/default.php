@@ -11,7 +11,7 @@
 // No direct access
 defined('_JEXEC') or die;
 
-// Accesso ai parametri processati dal file mod_ethical_tech_digest.php
+// Accesso ai parametri processati
 ?>
 
 <div class="ethical-tech-digest-container<?php echo $moduleclass_sfx; ?>">
