@@ -1,34 +1,35 @@
 
-# Ethical Tech Digest - Modulo per Joomla 5.2.6
+# Ethical Tech Digest Module for Joomla 5.2.6
 
-Modulo per incorporare il widget Ethical Tech Digest nel tuo sito Joomla.
+This module allows you to incorporate the Ethical Tech Digest widget into your Joomla site.
 
-## Installazione
+## Installation
 
-1. Comprimi tutti i file in questo pacchetto in un file `.zip`
-2. Accedi al pannello di amministrazione di Joomla
-3. Vai a "Sistema" > "Installazione estensioni"
-4. Trascina il file `.zip` nella sezione "Carica pacchetto"
-5. Una volta installato, vai a "Contenuto" > "Gestione moduli" e cerca "Ethical Tech Digest"
-6. Pubblica il modulo nella posizione desiderata del tuo template
+1. Download the ZIP file containing this module
+2. Log in to your Joomla administrator panel
+3. Go to System > Install > Extensions
+4. Click on the "Upload Package File" tab
+5. Drag and drop the ZIP file or click "Browse for file" to select it
+6. Once installed, go to Content > Site Modules
+7. Find the "Ethical Tech Digest" module and publish it to your desired position
 
-## Configurazione
+## Configuration
 
-Il modulo offre diverse opzioni di configurazione:
+The module offers several configuration options:
 
-- **Tema**: Scegli tra il tema chiaro o scuro (light/dark)
-- **Categorie**: Seleziona quali categorie di notizie mostrare
-- **Altezza**: Imposta l'altezza dell'iframe in pixel
-- **Metodo**: Scegli il metodo di integrazione (iframe o script)
+- **Theme**: Choose between light or dark theme
+- **Categories**: Select which news categories to display
+- **Height**: Set the height of the iframe in pixels
+- **Integration Method**: Choose between iframe (recommended) or JavaScript script
 
-## Risoluzione dei problemi
+## Troubleshooting
 
-Se il widget non viene visualizzato correttamente:
+If the widget doesn't display correctly:
 
-1. Assicurati che il tuo sito Joomla abbia accesso a Internet per caricare il contenuto
-2. Prova ad aumentare l'altezza dell'iframe se il contenuto risulta troncato
-3. Utilizza il metodo "iframe" invece di "script" se riscontri problemi
+1. Make sure your Joomla site has internet access to load the content
+2. Try increasing the iframe height if the content appears cut off
+3. Use the "iframe" method instead of "script" if you encounter any issues
 
-## Supporto
+## Support
 
-Per assistenza o segnalazioni di bug, contattaci all'indirizzo info@example.com
+For assistance or bug reports, please contact us at info@example.com

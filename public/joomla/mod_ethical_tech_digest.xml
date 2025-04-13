@@ -9,19 +9,19 @@
     <authorEmail>info@example.com</authorEmail>
     <authorUrl>https://example.com</authorUrl>
     <version>1.0.0</version>
-    <description>Modulo per visualizzare il widget Ethical Tech Digest</description>
+    <description>MOD_ETHICAL_TECH_DIGEST_XML_DESCRIPTION</description>
     
     <files>
         <filename module="mod_ethical_tech_digest">mod_ethical_tech_digest.php</filename>
         <filename>index.html</filename>
         <folder>tmpl</folder>
+        <folder>media</folder>
     </files>
     
-    <media destination="mod_ethical_tech_digest">
-        <folder>css</folder>
-        <folder>js</folder>
-        <filename>index.html</filename>
-    </media>
+    <languages>
+        <language tag="en-GB">language/en-GB/mod_ethical_tech_digest.ini</language>
+        <language tag="en-GB">language/en-GB/mod_ethical_tech_digest.sys.ini</language>
+    </languages>
     
     <config>
         <fields name="params">
@@ -29,43 +29,43 @@
                 <field
                     name="theme"
                     type="list"
-                    label="Tema"
-                    description="Scegli il tema del widget"
+                    label="Theme"
+                    description="Choose the widget theme"
                     default="light"
                 >
-                    <option value="light">Chiaro</option>
-                    <option value="dark">Scuro</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
                 </field>
                 
                 <field
                     name="categories"
                     type="checkboxes"
-                    label="Categorie"
-                    description="Seleziona le categorie da mostrare"
+                    label="Categories"
+                    description="Select which categories to display"
                     multiple="true"
                 >
-                    <option value="ai">Intelligenza Artificiale</option>
-                    <option value="robotics">Robotica</option>
-                    <option value="biotech">Biotecnologia</option>
+                    <option value="ai">Artificial Intelligence</option>
+                    <option value="robotics">Robotics</option>
+                    <option value="biotech">Biotechnology</option>
                 </field>
                 
                 <field
                     name="height"
                     type="text"
-                    label="Altezza"
-                    description="Altezza dell'iframe in pixel"
+                    label="Height"
+                    description="Height of the iframe in pixels"
                     default="800"
                 />
                 
                 <field
                     name="method"
                     type="list"
-                    label="Metodo"
-                    description="Scegli il metodo di integrazione"
+                    label="Integration Method"
+                    description="Choose the integration method"
                     default="iframe"
                 >
-                    <option value="iframe">iFrame (consigliato)</option>
-                    <option value="script">Script JS</option>
+                    <option value="iframe">iFrame (recommended)</option>
+                    <option value="script">JavaScript Script</option>
                 </field>
             </fieldset>
         </fields>

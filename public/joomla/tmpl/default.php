@@ -11,30 +11,31 @@
 // No direct access
 defined('_JEXEC') or die;
 
-// Accesso ai parametri processati
+// Access to processed parameters
 ?>
 
 <div class="ethical-tech-digest-container<?php echo $moduleclass_sfx; ?>">
     <?php if ($method === 'iframe') : ?>
-        <!-- Metodo iframe (consigliato) -->
+        <!-- iframe method (recommended) -->
         <iframe 
             src="<?php echo $baseUrl; ?>?theme=<?php echo $theme; ?>&categories=<?php echo $categories; ?>&t=<?php echo time(); ?>" 
             width="100%" 
             height="<?php echo $height; ?>" 
             frameborder="0" 
+            loading="lazy"
             title="Ethical Tech Digest">
         </iframe>
     <?php else : ?>
-        <!-- Metodo script -->
-        <div id="<?php echo $widgetId; ?>" data-theme="<?php echo $theme; ?>" data-categories="<?php echo $categories; ?>"></div>
+        <!-- script method -->
+        <div id="<?php echo $widgetId; ?>" data-theme="<?php echo $theme; ?>" data-categories="<?php echo $categories; ?>" class="ethical-tech-loading">Loading widget...</div>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Funzione per caricare il widget
+                // Function to load the widget
                 function loadEthicalTechDigest() {
                     const container = document.getElementById('<?php echo $widgetId; ?>');
                     if (!container) return;
                     
-                    // Crea direttamente l'iframe (il metodo più affidabile)
+                    // Create the iframe directly
                     const iframe = document.createElement('iframe');
                     iframe.style.width = '100%';
                     iframe.style.height = '<?php echo $height; ?>px';
@@ -43,7 +44,7 @@ defined('_JEXEC') or die;
                     iframe.setAttribute('title', 'Ethical Tech Digest');
                     iframe.setAttribute('loading', 'lazy');
                     
-                    // Costruisci l'URL con i parametri
+                    // Build the URL with parameters
                     const url = '<?php echo $baseUrl; ?>?theme=' + 
                                 container.getAttribute('data-theme') + 
                                 '&categories=' + 
@@ -52,12 +53,13 @@ defined('_JEXEC') or die;
                     
                     iframe.setAttribute('src', url);
                     
-                    // Pulisci container e aggiungi l'iframe
+                    // Clear container and add the iframe
                     container.innerHTML = '';
                     container.appendChild(iframe);
+                    container.className = 'ethical-tech-digest-loaded';
                 }
                 
-                // Esegui caricamento
+                // Execute loading
                 loadEthicalTechDigest();
             });
         </script>

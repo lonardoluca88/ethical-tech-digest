@@ -12,28 +12,41 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Helper\ModuleHelper;
+use Joomla\CMS\HTML\HTMLHelper;
 
-// Prepariamo i parametri
+// Add module styles
+HTMLHelper::_('stylesheet', 'mod_ethical_tech_digest/styles.css', ['relative' => true]);
+
+// Get parameters
 $theme = $params->get('theme', 'light');
-$categoriesArray = $params->get('categories', ['ai', 'robotics', 'biotech']);
 
-// Convertiamo l'array di categorie in una stringa separata da virgole
-if (is_array($categoriesArray)) {
-    $categories = implode(',', $categoriesArray);
+// Handle categories - they could be an array (from checkboxes) or a pre-formatted string
+$categoriesParam = $params->get('categories', ['ai', 'robotics', 'biotech']);
+if (is_array($categoriesParam)) {
+    // Check if we have any selected categories at all
+    $selectedCategories = [];
+    foreach ($categoriesParam as $category => $isSelected) {
+        if ($isSelected) {
+            $selectedCategories[] = $category;
+        }
+    }
+    
+    $categories = !empty($selectedCategories) ? implode(',', $selectedCategories) : 'ai,robotics,biotech';
 } else {
-    $categories = 'ai,robotics,biotech';
+    $categories = $categoriesParam ?: 'ai,robotics,biotech';
 }
 
 $height = $params->get('height', '800');
 $method = $params->get('method', 'iframe');
 
-// Base URL del widget
+// Base URL of the widget
 $baseUrl = 'https://leonardo2030.entourage-di-kryon.it/lovablenews/';
 
-// Generiamo un ID univoco per il container (utile se ci sono più istanze del modulo nella stessa pagina)
+// Generate a unique widget ID for this module instance
 $widgetId = 'ethical-tech-digest-' . $module->id;
 
-// Passiamo variabili al template
+// Get module class suffix
 $moduleclass_sfx = htmlspecialchars($params->get('moduleclass_sfx', ''));
 
+// Load the template
 require ModuleHelper::getLayoutPath('mod_ethical_tech_digest', 'default');
