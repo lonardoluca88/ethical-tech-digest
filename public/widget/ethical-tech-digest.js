@@ -93,7 +93,7 @@
       
       logger.info('URL iframe:', url.toString());
       
-      // IMPORTANTE: Utilizzo diretto del metodo iframe che funziona nei test
+      // Utilizzo diretto dell'iframe che è più affidabile per tutti gli ambienti incluso Kajabi
       const iframe = document.createElement('iframe');
       iframe.style.width = '100%';
       iframe.style.height = '600px';
@@ -127,7 +127,7 @@
       logger.error('Errore durante l\'inizializzazione del widget:', error);
       createStatusMessage(container, 'Si è verificato un errore. Utilizzo metodo alternativo...', true);
       
-      // Fallback al metodo alternativo di iframe che sappiamo funzionare
+      // Fallback diretto con iframe
       setTimeout(() => {
         try {
           const theme = container.getAttribute('data-theme') || defaultConfig.theme;

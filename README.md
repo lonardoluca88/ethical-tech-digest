@@ -67,39 +67,18 @@ Per testare l'incorporamento del widget in altri siti:
 <body>
   <h1>Test del Widget Ethical Tech Digest</h1>
   
-  <div id="ethical-tech-digest"></div>
-  <script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"></script>
+  <iframe 
+    src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
+    width="100%" 
+    height="800" 
+    frameborder="0" 
+    title="Ethical Tech Digest">
+  </iframe>
 </body>
 </html>
 ```
 
 2. Apri questo file HTML in un browser per verificare che il widget venga caricato correttamente
-
-## Configurazione dell'invio email
-
-Per implementare l'invio effettivo di email in ambiente di produzione:
-
-1. Crea un endpoint API sul tuo server che utilizzi una libreria server-side per l'invio di email (come Nodemailer per Node.js)
-
-2. Modifica il file `emailService.ts` per effettuare chiamate a questo endpoint invece di simulare l'invio
-
-3. Implementa la sicurezza necessaria per proteggere le credenziali SMTP
-
-## Guida all'installazione
-
-Una guida utente dettagliata è disponibile all'indirizzo:
-
-```
-https://leonardo2030.entourage-di-kryon.it/lovablenews/guide.html
-```
-
-## Amministrazione
-
-Il pannello di amministrazione è accessibile all'indirizzo:
-
-```
-https://leonardo2030.entourage-di-kryon.it/lovablenews/admin
-```
 
 ## Supporto
 

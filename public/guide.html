@@ -131,12 +131,21 @@
     <div class="step">
       <p><span class="step-number">4</span> <strong>Copia il codice di incorporamento</strong> qui sotto e incollalo nel blocco HTML.</p>
       
-      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest"&gt;&lt;/div&gt;
-&lt;script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
+      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;iframe 
+  src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
+  width="100%" 
+  height="800" 
+  frameborder="0" 
+  title="Ethical Tech Digest"&gt;
+&lt;/iframe&gt;</code></pre>
     </div>
     
     <div class="step">
       <p><span class="step-number">5</span> <strong>Salva le modifiche</strong> e pubblica la pagina.</p>
+    </div>
+    
+    <div class="note">
+      <strong>Consiglio:</strong> L'utilizzo diretto dell'iframe è il metodo più affidabile per Kajabi e garantisce la corretta visualizzazione del widget.
     </div>
   </div>
   
@@ -150,8 +159,13 @@
     <div class="step">
       <p><span class="step-number">2</span> <strong>Aggiungi il seguente codice</strong> nel punto in cui desideri visualizzare il widget:</p>
       
-      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest"&gt;&lt;/div&gt;
-&lt;script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
+      <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;iframe 
+  src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
+  width="100%" 
+  height="800" 
+  frameborder="0" 
+  title="Ethical Tech Digest"&gt;
+&lt;/iframe&gt;</code></pre>
     </div>
     
     <div class="step">
@@ -166,22 +180,24 @@
   <div class="tab-content" id="config-content">
     <h2>Opzioni di configurazione</h2>
     
-    <p>È possibile personalizzare il widget utilizzando attributi dati nell'elemento contenitore:</p>
+    <p>È possibile personalizzare il widget utilizzando parametri nell'URL dell'iframe:</p>
     
-    <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;div id="ethical-tech-digest" 
-  data-theme="light" 
-  data-categories="ai,robotics,biotech"&gt;
-&lt;/div&gt;</code></pre>
+    <pre><button class="copy-btn">Copia</button><span class="success">✓ Copiato!</span><code>&lt;iframe src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
+  width="100%" 
+  height="800" 
+  frameborder="0" 
+  title="Ethical Tech Digest"&gt;
+&lt;/iframe&gt;</code></pre>
     
     <h3>Opzioni disponibili:</h3>
     
     <ul>
-      <li><code>data-theme</code>: Imposta il tema del widget ("light" o "dark")</li>
-      <li><code>data-categories</code>: Specifica le categorie da visualizzare inizialmente (separate da virgola)</li>
+      <li><code>theme</code>: Imposta il tema del widget ("light" o "dark")</li>
+      <li><code>categories</code>: Specifica le categorie da visualizzare inizialmente (separate da virgola)</li>
     </ul>
     
     <div class="warning">
-      <strong>Importante:</strong> L'ID "ethical-tech-digest" è obbligatorio e non deve essere modificato.
+      <strong>Importante:</strong> Se modifichi l'altezza dell'iframe, assicurati che sia sufficiente per visualizzare tutto il contenuto (800px è un buon valore di partenza).
     </div>
   </div>
   
