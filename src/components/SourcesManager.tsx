@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NewsSource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Slider } from '@/components/ui/slider';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SourcesManagerProps {
@@ -18,13 +17,30 @@ interface SourcesManagerProps {
 
 const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentSource, setCurrentSource] = useState<Partial<NewsSource>>({
     name: '',
     url: '',
     reliability: 7
   });
   const [editMode, setEditMode] = useState(false);
-  
+
+  const handleRefreshNews = async () => {
+    setIsRefreshing(true);
+    const keywords = ['AI', 'Ethics', 'Robotics', 'Biotechnology'];
+    
+    try {
+      // Simulate API call - replace with actual implementation
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('Ricerca notizie completata con successo');
+    } catch (error) {
+      toast.error('Errore durante la ricerca delle notizie');
+      console.error('Error refreshing news:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const handleOpenDialog = (source?: NewsSource) => {
     if (source) {
       setCurrentSource(source);
@@ -39,32 +55,29 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
     }
     setIsDialogOpen(true);
   };
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCurrentSource({ ...currentSource, [name]: value });
   };
-  
+
   const handleReliabilityChange = (value: number[]) => {
     setCurrentSource({ ...currentSource, reliability: value[0] });
   };
-  
+
   const handleSave = () => {
-    // Validate
     if (!currentSource.name || !currentSource.url) {
       toast.error('Nome e URL sono campi obbligatori');
       return;
     }
-    
+
     if (editMode) {
-      // Update existing source
       const updatedSources = sources.map(source => 
         source.id === currentSource.id ? { ...currentSource as NewsSource } : source
       );
       onUpdate(updatedSources);
       toast.success('Fonte aggiornata con successo');
     } else {
-      // Add new source
       const newSource: NewsSource = {
         id: crypto.randomUUID(),
         name: currentSource.name,
@@ -74,10 +87,10 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
       onUpdate([...sources, newSource]);
       toast.success('Fonte aggiunta con successo');
     }
-    
+
     setIsDialogOpen(false);
   };
-  
+
   const handleDelete = (id: string) => {
     if (confirm('Sei sicuro di voler eliminare questa fonte?')) {
       const updatedSources = sources.filter(source => source.id !== id);
@@ -85,15 +98,26 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
       toast.success('Fonte eliminata con successo');
     }
   };
-  
+
   return (
     <Card className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Gestione Fonti</h2>
-        <Button onClick={() => handleOpenDialog()} size="sm">
-          <Plus size={16} className="mr-1" />
-          Aggiungi Fonte
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleRefreshNews} 
+            size="sm"
+            variant="outline"
+            disabled={isRefreshing}
+          >
+            <RefreshCw size={16} className={`mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Aggiorna Notizie
+          </Button>
+          <Button onClick={() => handleOpenDialog()} size="sm">
+            <Plus size={16} className="mr-1" />
+            Aggiungi Fonte
+          </Button>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
@@ -163,7 +187,6 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
         </Table>
       </div>
       
-      {/* Source Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
