@@ -14,7 +14,7 @@ Questo repository contiene il codice sorgente del widget Ethical Tech Digest, pr
 ### Prerequisiti
 
 - Accesso FTP al server web
-- Sottodominio configurato (es. `https://leonardo2030.entourage-di-kryon.it/lovablenews`)
+- Sottodominio configurato (es. `https://news.entourage-di-kryon.it`)
 
 ### Istruzioni per il deployment
 
@@ -68,7 +68,7 @@ Per testare l'incorporamento del widget in altri siti:
   <h1>Test del Widget Ethical Tech Digest</h1>
   
   <iframe 
-    src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
+    src="http://news.entourage-di-kryon.it/?theme=light&categories=ai,robotics,biotech" 
     width="100%" 
     height="800" 
     frameborder="0" 

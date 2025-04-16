@@ -67,7 +67,7 @@
       
       // Determina il percorso base in modo dinamico
       const scriptTags = document.getElementsByTagName('script');
-      let baseUrl = 'https://leonardo2030.entourage-di-kryon.it/lovablenews/';
+      let baseUrl = 'http://news.entourage-di-kryon.it/';
       let scriptFound = false;
       
       // Cerca lo script corrente per determinare il baseUrl
@@ -134,7 +134,7 @@
           const categoriesAttr = container.getAttribute('data-categories');
           const categories = categoriesAttr ? categoriesAttr.split(',') : defaultConfig.categories;
           
-          const fallbackUrl = `https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=${theme}&categories=${categories.join(',')}&t=${new Date().getTime()}`;
+          const fallbackUrl = `http://news.entourage-di-kryon.it/?theme=${theme}&categories=${categories.join(',')}&t=${new Date().getTime()}`;
           
           container.innerHTML = `<iframe src="${fallbackUrl}" style="width:100%; height:600px; border:none; overflow:hidden;" title="Ethical Tech Digest"></iframe>`;
           logger.info('Utilizzato fallback iframe:', fallbackUrl);

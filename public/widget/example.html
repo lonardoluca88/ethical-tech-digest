@@ -85,7 +85,7 @@
     <p>Questo è un esempio di come incorporare il widget Ethical Tech Digest in una pagina HTML.</p>
     <p>Codice da utilizzare:</p>
     <pre><code>&lt;div id="ethical-tech-digest" data-theme="light" data-categories="ai,robotics,biotech"&gt;&lt;/div&gt;
-&lt;script src="https://leonardo2030.entourage-di-kryon.it/lovablenews/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
+&lt;script src="http://news.entourage-di-kryon.it/widget/ethical-tech-digest.js"&gt;&lt;/script&gt;</code></pre>
   </div>
   
   <div class="container">
@@ -149,7 +149,7 @@
           const container = document.getElementById('ethical-tech-digest');
           const statusMessages = document.getElementById('status-messages');
           
-          container.innerHTML = '<iframe src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" style="width:100%; height:600px; border:none;"></iframe>';
+          container.innerHTML = '<iframe src="http://news.entourage-di-kryon.it/?theme=light&categories=ai,robotics,biotech" style="width:100%; height:600px; border:none;"></iframe>';
           
           // Mostra messaggio di successo
           statusMessages.innerHTML = '<div class="success-message">Caricamento con iframe diretto</div>';
@@ -163,7 +163,7 @@
           statusMessages.innerHTML = '<div>Verificando accesso al sito...</div>';
           
           // Funzione per verificare l'accesso
-          fetch('https://leonardo2030.entourage-di-kryon.it/lovablenews/', {
+          fetch('http://news.entourage-di-kryon.it/', {
             method: 'HEAD',
             cache: 'no-cache'
           })

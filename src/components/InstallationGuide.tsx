@@ -19,9 +19,9 @@ const InstallationGuide: React.FC = () => {
     }, 2000);
   };
   
-  // Aggiornato per utilizzare solo il metodo iframe che è più affidabile
+  // Aggiornato con il nuovo sottodominio
   const iframeEmbed = `<iframe 
-  src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" 
+  src="http://news.entourage-di-kryon.it/?theme=light&categories=ai,robotics,biotech" 
   width="100%" 
   height="800" 
   frameborder="0" 
@@ -88,7 +88,7 @@ const InstallationGuide: React.FC = () => {
             Per personalizzare il widget, puoi modificare i parametri nell'URL dell'iframe:
           </p>
           <pre className="bg-white p-3 rounded border border-blue-100 text-sm overflow-auto">
-            <code>{`<iframe src="https://leonardo2030.entourage-di-kryon.it/lovablenews/?theme=light&categories=ai,robotics,biotech" ...`}</code>
+            <code>{`<iframe src="http://news.entourage-di-kryon.it/?theme=light&categories=ai,robotics,biotech" ...`}</code>
           </pre>
           <ul className="text-sm text-blue-600 mt-3 space-y-1">
             <li><code>theme</code>: "light" o "dark" per adattarsi al tema del tuo sito</li>
