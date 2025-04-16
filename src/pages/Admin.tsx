@@ -17,6 +17,12 @@ import InstallationGuide from '@/components/InstallationGuide';
 import { toast } from 'sonner';
 import { CategoryIcon, getCategoryName } from '@/components/icons/CategoryIcons';
 
+const STORAGE_KEYS = {
+  NEWS: 'ethicalTechDigest_news',
+  SOURCES: 'ethicalTechDigest_sources',
+  SETTINGS: 'ethicalTechDigest_settings'
+};
+
 const Admin = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [sources, setSources] = useState<NewsSource[]>([]);
@@ -26,10 +32,32 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("news");
   
   useEffect(() => {
-    // Simulate loading data from storage/API
-    setNews(dummyNews);
-    setSources(dummySources);
+    // Load data from localStorage or use dummy data as fallback
+    const savedNews = localStorage.getItem(STORAGE_KEYS.NEWS);
+    const savedSources = localStorage.getItem(STORAGE_KEYS.SOURCES);
+    const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+    
+    setNews(savedNews ? JSON.parse(savedNews) : dummyNews);
+    setSources(savedSources ? JSON.parse(savedSources) : dummySources);
+    setSettings(savedSettings ? JSON.parse(savedSettings) : defaultAppSettings);
   }, []);
+  
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    if (news.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(news));
+    }
+  }, [news]);
+  
+  useEffect(() => {
+    if (sources.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.SOURCES, JSON.stringify(sources));
+    }
+  }, [sources]);
+  
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+  }, [settings]);
   
   const handleEditNews = (newsItem: NewsItem) => {
     setCurrentNewsItem(newsItem);
@@ -75,6 +103,12 @@ const Admin = () => {
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('it-IT');
+  };
+
+  // Get the actual source name for display
+  const getSourceName = (sourceId: string) => {
+    const source = sources.find(s => s.id === sourceId);
+    return source?.name || 'Sconosciuta';
   };
   
   return (
@@ -122,11 +156,17 @@ const Admin = () => {
           
           <TabsContent value="news" className="border-none p-0 mt-4">
             <div className="flex justify-end mb-4">
-              <Button onClick={handleAddNews} className="flex items-center gap-1">
+              <Button onClick={handleAddNews} className="flex items-center gap-1" disabled={sources.length === 0}>
                 <Plus size={16} />
                 Aggiungi Notizia
               </Button>
             </div>
+            
+            {sources.length === 0 && (
+              <div className="mb-4 p-3 border border-yellow-300 bg-yellow-50 text-yellow-800 rounded-md">
+                <p>Prima di aggiungere notizie, devi creare almeno una fonte nella sezione Fonti.</p>
+              </div>
+            )}
             
             <div className="overflow-x-auto rounded-lg border">
               <Table>
@@ -147,40 +187,37 @@ const Admin = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    news.map(item => {
-                      const source = sources.find(s => s.id === item.sourceId);
-                      return (
-                        <TableRow key={item.id}>
-                          <TableCell>{formatDate(item.date)}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <CategoryIcon category={item.category} size={16} />
-                              <span className="hidden md:inline">{getCategoryName(item.category)}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">{item.title}</TableCell>
-                          <TableCell>{source?.name || 'Sconosciuta'}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleEditNews(item)}
-                              >
-                                <Pencil size={16} />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteNews(item.id)}
-                              >
-                                <Trash2 size={16} />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })
+                    news.map(item => (
+                      <TableRow key={item.id}>
+                        <TableCell>{formatDate(item.date)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <CategoryIcon category={item.category} size={16} />
+                            <span className="hidden md:inline">{getCategoryName(item.category)}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">{item.title}</TableCell>
+                        <TableCell>{getSourceName(item.sourceId)}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditNews(item)}
+                            >
+                              <Pencil size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteNews(item.id)}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
               </Table>

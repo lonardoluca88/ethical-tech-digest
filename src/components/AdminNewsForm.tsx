@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NewsItem, NewsCategory, NewsSource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,11 +26,18 @@ const AdminNewsForm: React.FC<AdminNewsFormProps> = ({
       title: '',
       url: '',
       date: new Date().toISOString().split('T')[0],
-      sourceId: sources[0]?.id || '',
+      sourceId: sources.length > 0 ? sources[0]?.id : '',
       category: 'ai' as NewsCategory,
       summary: ''
     }
   );
+  
+  // Update sourceId if initial sources change or if current sourceId doesn't exist in sources
+  useEffect(() => {
+    if (sources.length > 0 && (!formData.sourceId || !sources.some(s => s.id === formData.sourceId))) {
+      setFormData(prev => ({ ...prev, sourceId: sources[0].id }));
+    }
+  }, [sources, formData.sourceId]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -47,6 +54,11 @@ const AdminNewsForm: React.FC<AdminNewsFormProps> = ({
     // Validate form
     if (!formData.title || !formData.url || !formData.sourceId || !formData.category) {
       toast.error('Per favore completa tutti i campi obbligatori');
+      return;
+    }
+    
+    if (sources.length === 0) {
+      toast.error('Non ci sono fonti disponibili. Aggiungi almeno una fonte prima di creare un articolo');
       return;
     }
     
@@ -107,22 +119,28 @@ const AdminNewsForm: React.FC<AdminNewsFormProps> = ({
       
       <div className="space-y-2">
         <Label htmlFor="sourceId">Fonte *</Label>
-        <Select 
-          name="sourceId" 
-          value={formData.sourceId} 
-          onValueChange={(value) => handleSelectChange('sourceId', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleziona una fonte" />
-          </SelectTrigger>
-          <SelectContent>
-            {sources.map(source => (
-              <SelectItem key={source.id} value={source.id}>
-                {source.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {sources.length > 0 ? (
+          <Select 
+            name="sourceId" 
+            value={formData.sourceId} 
+            onValueChange={(value) => handleSelectChange('sourceId', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleziona una fonte" />
+            </SelectTrigger>
+            <SelectContent>
+              {sources.map(source => (
+                <SelectItem key={source.id} value={source.id}>
+                  {source.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="text-sm text-red-500 p-2 border border-red-200 rounded bg-red-50">
+            Non ci sono fonti disponibili. Aggiungi prima una fonte nella sezione Fonti.
+          </div>
+        )}
       </div>
       
       <div className="space-y-2">
@@ -158,7 +176,7 @@ const AdminNewsForm: React.FC<AdminNewsFormProps> = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Annulla
         </Button>
-        <Button type="submit">
+        <Button type="submit" disabled={sources.length === 0}>
           {initialData ? 'Aggiorna' : 'Aggiungi'}
         </Button>
       </div>

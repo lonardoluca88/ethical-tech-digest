@@ -83,6 +83,13 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
       };
       onUpdate([...sources, newSource]);
       toast.success('Fonte aggiunta con successo');
+      
+      // Clear form after successful addition
+      setCurrentSource({
+        name: '',
+        url: '',
+        reliability: 7
+      });
     }
 
     setIsDialogOpen(false);
