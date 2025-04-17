@@ -5,13 +5,18 @@ import NewsItem from './NewsItem';
 
 interface NewsGridProps {
   news: NewsItemType[];
+  searchQuery?: string;
 }
 
-const NewsGrid: React.FC<NewsGridProps> = ({ news }) => {
+const NewsGrid: React.FC<NewsGridProps> = ({ news, searchQuery }) => {
   if (news.length === 0) {
     return (
       <div className="py-10 text-center">
-        <p className="text-lg text-muted-foreground">Nessuna notizia trovata.</p>
+        <p className="text-lg text-muted-foreground">
+          {searchQuery 
+            ? `Nessuna notizia trovata per "${searchQuery}".` 
+            : 'Nessuna notizia trovata.'}
+        </p>
       </div>
     );
   }

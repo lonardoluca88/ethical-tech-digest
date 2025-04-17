@@ -4,18 +4,22 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsGrid from '@/components/NewsGrid';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { NewsItem } from '@/lib/types';
 import { dummyNews } from '@/lib/dummyData';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Search, X } from 'lucide-react';
 
 const STORAGE_KEYS = {
   NEWS: 'ethicalTechDigest_news'
 };
 
 const Weekly = () => {
+  const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [weeklyNews, setWeeklyNews] = useState<NewsItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState<number>(0); // 0 = current week, -1 = last week, etc.
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchInput, setSearchInput] = useState<string>('');
   
   // Get date range for the selected week
   const getWeekDates = (weekOffset: number) => {
@@ -25,10 +29,12 @@ const Weekly = () => {
     // Calculate the start of the week (Monday)
     const start = new Date(now);
     start.setDate(now.getDate() - currentDay + (currentDay === 0 ? -6 : 1) + (weekOffset * 7));
+    start.setHours(0, 0, 0, 0);
     
     // Calculate the end of the week (Sunday)
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
     
     return { start, end };
   };
@@ -47,8 +53,8 @@ const Weekly = () => {
     return `${startStr} - ${endStr} ${year}`;
   };
   
+  // Load all news
   useEffect(() => {
-    // Load news from localStorage or use dummy data as fallback
     setIsLoading(true);
     
     try {
@@ -60,26 +66,47 @@ const Weekly = () => {
         newsToUse = Array.isArray(parsedNews) ? parsedNews : dummyNews;
       }
       
-      // Filter by the selected week's date range if needed
-      const { start, end } = getWeekDates(currentWeek);
+      // Sort news by date (newest first)
+      const sortedNews = [...newsToUse].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
       
-      // Ensure we're comparing dates properly
-      const weeklyFiltered = newsToUse.filter(item => {
-        const itemDate = new Date(item.date);
-        return itemDate >= start && itemDate <= end;
-      });
-      
-      setWeeklyNews(weeklyFiltered);
+      setAllNews(sortedNews);
     } catch (error) {
       console.error('Errore nel caricare le notizie:', error);
-      setWeeklyNews([]);
+      setAllNews([]);
     }
     
     setIsLoading(false);
-  }, [currentWeek]);
+  }, []);
+  
+  // Filter news by week whenever allNews or currentWeek changes
+  useEffect(() => {
+    const { start, end } = getWeekDates(currentWeek);
+    
+    // Filter by the selected week's date range
+    const weeklyFiltered = allNews.filter(item => {
+      const itemDate = new Date(item.date);
+      return itemDate >= start && itemDate <= end;
+    });
+    
+    setWeeklyNews(weeklyFiltered);
+  }, [allNews, currentWeek]);
   
   const { start, end } = getWeekDates(currentWeek);
   const dateRangeDisplay = formatDateRange(start, end);
+  
+  // Filter news by search query
+  const filteredNews = weeklyNews.filter(item => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      item.title.toLowerCase().includes(query) || 
+      (item.summary && item.summary.toLowerCase().includes(query)) || 
+      (item.content && item.content.toLowerCase().includes(query))
+    );
+  });
   
   // Group news by category
   const groupByCategory = (items: NewsItem[]) => {
@@ -98,7 +125,7 @@ const Weekly = () => {
     return Object.values(categories).filter(category => category.items.length > 0);
   };
   
-  const groupedNews = groupByCategory(weeklyNews);
+  const groupedNews = groupByCategory(filteredNews);
   
   const handlePrevWeek = () => {
     setCurrentWeek(currentWeek - 1);
@@ -112,6 +139,16 @@ const Weekly = () => {
   
   const handleCurrentWeek = () => {
     setCurrentWeek(0);
+  };
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(searchInput);
+  };
+  
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchInput('');
   };
   
   const isCurrentWeek = currentWeek === 0;
@@ -130,7 +167,7 @@ const Weekly = () => {
           </p>
         </div>
         
-        <div className="flex items-center justify-between mb-6 border-b pb-3">
+        <div className="flex items-center justify-between mb-4 border-b pb-3">
           <Button 
             variant="outline" 
             size="sm" 
@@ -180,6 +217,45 @@ const Weekly = () => {
           </div>
         </div>
         
+        <div className="mb-6">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                type="text"
+                placeholder="Cerca notizie settimanali..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              {searchInput && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0" 
+                  onClick={() => setSearchInput('')}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+            <Button type="submit">Cerca</Button>
+          </form>
+          
+          {searchQuery && (
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-sm text-muted-foreground">
+                Risultati per: <span className="font-medium text-foreground">"{searchQuery}"</span>
+                {filteredNews.length > 0 && (
+                  <span> ({filteredNews.length} risultat{filteredNews.length === 1 ? 'o' : 'i'})</span>
+                )}
+              </p>
+              <Button variant="ghost" size="sm" onClick={clearSearch}>Cancella ricerca</Button>
+            </div>
+          )}
+        </div>
+        
         {isLoading ? (
           <div className="py-10 text-center">
             <p className="text-lg text-muted-foreground">Caricamento notizie...</p>
@@ -191,16 +267,12 @@ const Weekly = () => {
                 <h2 className="text-2xl font-medium mb-4">
                   {category.label}
                 </h2>
-                <NewsGrid news={category.items} />
+                <NewsGrid news={category.items} searchQuery={searchQuery} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="py-10 text-center">
-            <p className="text-lg text-muted-foreground">
-              Nessuna notizia disponibile per questa settimana.
-            </p>
-          </div>
+          <NewsGrid news={[]} searchQuery={searchQuery} />
         )}
       </main>
       
