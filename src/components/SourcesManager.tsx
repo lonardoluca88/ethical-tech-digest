@@ -7,6 +7,7 @@ import { Plus, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import AddEditSourceDialog from './sources/AddEditSourceDialog';
 import SourcesTable from './sources/SourcesTable';
+import { NewsFetchingService } from '@/lib/newsFetchingService';
 
 interface SourcesManagerProps {
   sources: NewsSource[];
@@ -25,11 +26,15 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
 
   const handleRefreshNews = async () => {
     setIsRefreshing(true);
-    const keywords = ['AI', 'Ethics', 'Robotics', 'Biotechnology'];
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Ricerca notizie completata con successo');
+      const result = await NewsFetchingService.refreshNews();
+      
+      if (result.success) {
+        toast.success(`Ricerca notizie completata: ${result.newArticlesCount} nuovi articoli trovati`);
+      } else {
+        toast.error(`Errore durante la ricerca: ${result.message}`);
+      }
     } catch (error) {
       toast.error('Errore durante la ricerca delle notizie');
       console.error('Error refreshing news:', error);

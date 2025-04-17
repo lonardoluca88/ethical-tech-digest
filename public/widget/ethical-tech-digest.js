@@ -19,6 +19,99 @@
     }
   };
   
+  // News Scheduler - Verifica e avvia la ricerca delle notizie
+  function initializeNewsScheduler() {
+    logger.info('Initializing news scheduler...');
+    // Check if we should fetch news now
+    checkAndFetchNews();
+    // Schedule daily fetch at 6:00 AM
+    scheduleNextNewsRun();
+    // Mark as initialized
+    sessionStorage.setItem('news_scheduler_initialized', 'true');
+  }
+  
+  // Schedule news fetching at 6:00 AM
+  function scheduleNextNewsRun() {
+    const now = new Date();
+    const nextRun = new Date();
+    
+    // Set time to 6:00 AM
+    nextRun.setHours(6, 0, 0, 0);
+    
+    // If it's already past 6:00 AM, schedule for tomorrow
+    if (now >= nextRun) {
+      nextRun.setDate(nextRun.getDate() + 1);
+    }
+    
+    const timeUntilNextRun = nextRun.getTime() - now.getTime();
+    logger.info(`Next news fetch scheduled at ${nextRun.toLocaleString()} (in ${Math.floor(timeUntilNextRun / (1000 * 60 * 60))} hours)`);
+    
+    setTimeout(function() {
+      fetchNews()
+        .then(function(result) {
+          logger.info('Scheduled news fetch completed:', result);
+          // Schedule next run
+          scheduleNextNewsRun();
+        })
+        .catch(function(error) {
+          logger.error('Error in scheduled news fetch:', error);
+          // Still schedule next run even if there was an error
+          scheduleNextNewsRun();
+        });
+    }, timeUntilNextRun);
+  }
+  
+  // Check if we should fetch news
+  function checkAndFetchNews() {
+    try {
+      const lastFetchStr = localStorage.getItem('ethicalTechDigest_lastFetch');
+      const now = new Date();
+      
+      // If no last fetch or last fetch was more than 12 hours ago, fetch news
+      if (!lastFetchStr || (now.getTime() - new Date(lastFetchStr).getTime() > 12 * 60 * 60 * 1000)) {
+        logger.info('Starting news fetch...');
+        fetchNews()
+          .then(function(result) {
+            logger.info('News fetch completed:', result);
+          })
+          .catch(function(error) {
+            logger.error('Error fetching news:', error);
+          });
+      } else {
+        logger.info('Skipping news fetch: last fetch was less than 12 hours ago');
+      }
+    } catch (error) {
+      logger.error('Error checking if news should be fetched:', error);
+    }
+  }
+  
+  // Fetch news
+  async function fetchNews() {
+    try {
+      // This is a placeholder that the main application will extend with real implementation
+      // The widget itself doesn't have direct access to news fetching logic
+      // It just schedules when news should be fetched
+      logger.info('Widget triggered news fetch');
+      
+      // Update last fetch time
+      localStorage.setItem('ethicalTechDigest_lastFetch', new Date().toISOString());
+      
+      // Trigger a custom event that the main app can listen for
+      window.dispatchEvent(new CustomEvent('ethicalTechDigest_fetchNews'));
+      
+      return {
+        success: true,
+        message: 'News fetch triggered'
+      };
+    } catch (error) {
+      logger.error('Error in fetchNews:', error);
+      return {
+        success: false,
+        message: error.toString()
+      };
+    }
+  }
+  
   // Aggiungiamo uno status visibile all'utente
   function createStatusMessage(container, message, isError = false) {
     logger.info(`Creazione messaggio di stato: ${message}, isError: ${isError}`);
@@ -56,6 +149,11 @@
     // Mostra messaggio di caricamento
     logger.info('Inizializzazione widget...');
     const statusEl = createStatusMessage(container, 'Caricamento del widget in corso...');
+    
+    // Initialize news scheduler if not already initialized
+    if (!sessionStorage.getItem('news_scheduler_initialized')) {
+      initializeNewsScheduler();
+    }
     
     try {
       // Leggi la configurazione
@@ -160,5 +258,10 @@
       container.innerHTML = '';
       loadWidget();
     }
+  };
+  
+  // Esponi una funzione per aggiornare manualmente le notizie
+  window.updateEthicalTechNews = function() {
+    return fetchNews();
   };
 })();

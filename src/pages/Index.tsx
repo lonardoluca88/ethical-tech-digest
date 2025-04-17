@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { NewsCategory, NewsItem } from '@/lib/types';
 import { dummyNews } from '@/lib/dummyData';
 import { Search, X } from 'lucide-react';
+import { NewsFetchingService } from '@/lib/newsFetchingService';
+import { toast } from 'sonner';
 
 const STORAGE_KEYS = {
   NEWS: 'ethicalTechDigest_news'
@@ -22,6 +24,9 @@ const Index = () => {
   const [searchInput, setSearchInput] = useState<string>('');
   
   useEffect(() => {
+    // Initialize news scheduler
+    NewsFetchingService.scheduleDailyFetch();
+    
     // Load all news from localStorage or use dummy data as fallback
     setIsLoading(true);
     
@@ -31,7 +36,26 @@ const Index = () => {
         const parsedNews = JSON.parse(savedNews);
         setNews(Array.isArray(parsedNews) ? parsedNews : dummyNews);
       } else {
+        // If no news in localStorage, add dummy news and then fetch real news
+        localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(dummyNews));
         setNews(dummyNews);
+        
+        // Try to fetch news
+        NewsFetchingService.fetchNews()
+          .then(result => {
+            if (result.success && result.newArticlesCount && result.newArticlesCount > 0) {
+              // Reload news from localStorage since fetchNews updates it
+              const updatedNews = localStorage.getItem(STORAGE_KEYS.NEWS);
+              if (updatedNews) {
+                const parsedUpdatedNews = JSON.parse(updatedNews);
+                setNews(parsedUpdatedNews);
+                toast.success(`Trovati ${result.newArticlesCount} nuovi articoli`);
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching news:', error);
+          });
       }
     } catch (error) {
       console.error('Errore nel caricare le notizie:', error);
@@ -39,6 +63,31 @@ const Index = () => {
     }
     
     setIsLoading(false);
+    
+    // Listen for news fetch events from the widget
+    const handleWidgetFetchNews = () => {
+      NewsFetchingService.fetchNews()
+        .then(result => {
+          if (result.success && result.newArticlesCount && result.newArticlesCount > 0) {
+            // Reload news from localStorage
+            const updatedNews = localStorage.getItem(STORAGE_KEYS.NEWS);
+            if (updatedNews) {
+              const parsedUpdatedNews = JSON.parse(updatedNews);
+              setNews(parsedUpdatedNews);
+              toast.success(`Trovati ${result.newArticlesCount} nuovi articoli`);
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching news from widget event:', error);
+        });
+    };
+    
+    window.addEventListener('ethicalTechDigest_fetchNews', handleWidgetFetchNews);
+    
+    return () => {
+      window.removeEventListener('ethicalTechDigest_fetchNews', handleWidgetFetchNews);
+    };
   }, []);
   
   // Ordina le notizie per data (più recenti prima)
