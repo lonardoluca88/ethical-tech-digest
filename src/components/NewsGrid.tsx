@@ -19,7 +19,7 @@ const NewsGrid: React.FC<NewsGridProps> = ({ news }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {news.map((item) => (
-        <NewsItem key={`news-${item.id}-${Date.now()}`} item={item} />
+        <NewsItem key={`news-${item.id}`} item={item} />
       ))}
     </div>
   );

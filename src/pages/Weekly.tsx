@@ -8,6 +8,10 @@ import { NewsItem } from '@/lib/types';
 import { dummyNews } from '@/lib/dummyData';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
+const STORAGE_KEYS = {
+  NEWS: 'ethicalTechDigest_news'
+};
+
 const Weekly = () => {
   const [weeklyNews, setWeeklyNews] = useState<NewsItem[]>([]);
   const [currentWeek, setCurrentWeek] = useState<number>(0); // 0 = current week, -1 = last week, etc.
@@ -44,15 +48,34 @@ const Weekly = () => {
   };
   
   useEffect(() => {
-    // Simulate loading news from an API based on the selected week
+    // Load news from localStorage or use dummy data as fallback
     setIsLoading(true);
     
-    setTimeout(() => {
-      // In a real scenario, we would filter by date range from the API
-      // For now we're using all the dummy data
-      setWeeklyNews(dummyNews);
-      setIsLoading(false);
-    }, 500);
+    try {
+      const savedNews = localStorage.getItem(STORAGE_KEYS.NEWS);
+      let newsToUse = dummyNews;
+      
+      if (savedNews) {
+        const parsedNews = JSON.parse(savedNews);
+        newsToUse = Array.isArray(parsedNews) ? parsedNews : dummyNews;
+      }
+      
+      // Filter by the selected week's date range if needed
+      const { start, end } = getWeekDates(currentWeek);
+      
+      // Ensure we're comparing dates properly
+      const weeklyFiltered = newsToUse.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate >= start && itemDate <= end;
+      });
+      
+      setWeeklyNews(weeklyFiltered);
+    } catch (error) {
+      console.error('Errore nel caricare le notizie:', error);
+      setWeeklyNews([]);
+    }
+    
+    setIsLoading(false);
   }, [currentWeek]);
   
   const { start, end } = getWeekDates(currentWeek);

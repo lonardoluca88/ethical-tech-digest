@@ -36,9 +36,14 @@ const Index = () => {
     setIsLoading(false);
   }, []);
   
+  // Ordina le notizie per data (più recenti prima)
+  const sortedNews = [...news].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+  
   const filteredNews = selectedCategory === 'all' 
-    ? news 
-    : news.filter(item => item.category === selectedCategory);
+    ? sortedNews 
+    : sortedNews.filter(item => item.category === selectedCategory);
   
   // Group news by date
   const groupByDate = (items: NewsItem[]) => {
