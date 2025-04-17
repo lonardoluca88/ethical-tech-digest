@@ -7,18 +7,33 @@ import CategoryFilter from '@/components/CategoryFilter';
 import { NewsCategory, NewsItem } from '@/lib/types';
 import { dummyNews } from '@/lib/dummyData';
 
+const STORAGE_KEYS = {
+  NEWS: 'ethicalTechDigest_news'
+};
+
 const Index = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | 'all'>('all');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
   useEffect(() => {
-    // Simulate loading news from an API
+    // Load news from localStorage or use dummy data as fallback
     setIsLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const savedNews = localStorage.getItem(STORAGE_KEYS.NEWS);
+      if (savedNews) {
+        const parsedNews = JSON.parse(savedNews);
+        setNews(Array.isArray(parsedNews) ? parsedNews : dummyNews);
+      } else {
+        setNews(dummyNews);
+      }
+    } catch (error) {
+      console.error('Errore nel caricare le notizie:', error);
       setNews(dummyNews);
-      setIsLoading(false);
-    }, 500);
+    }
+    
+    setIsLoading(false);
   }, []);
   
   const filteredNews = selectedCategory === 'all' 

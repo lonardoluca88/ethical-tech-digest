@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { NewsItem as NewsItemType } from '@/lib/types';
+import { NewsItem as NewsItemType, NewsSource } from '@/lib/types';
 import { CategoryIcon, getCategoryName } from './icons/CategoryIcons';
 import { dummySources } from '@/lib/dummyData';
 import { ExternalLink } from 'lucide-react';
@@ -9,6 +9,10 @@ import { useLinkChecker } from '@/hooks/useLinkChecker';
 interface NewsItemProps {
   item: NewsItemType;
 }
+
+const STORAGE_KEYS = {
+  SOURCES: 'ethicalTechDigest_sources'
+};
 
 const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
   const { isValid, isLoading } = useLinkChecker(item.url);
@@ -22,7 +26,19 @@ const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
     return new Date(dateString).toLocaleDateString('it-IT', options);
   };
 
-  const source = dummySources.find(source => source.id === item.sourceId);
+  // Get sources from localStorage or use dummy sources as fallback
+  let sources: NewsSource[] = dummySources;
+  try {
+    const savedSources = localStorage.getItem(STORAGE_KEYS.SOURCES);
+    if (savedSources) {
+      const parsedSources = JSON.parse(savedSources);
+      sources = Array.isArray(parsedSources) ? parsedSources : dummySources;
+    }
+  } catch (error) {
+    console.error('Errore nel caricare le fonti:', error);
+  }
+
+  const source = sources.find(source => source.id === item.sourceId);
   
   return (
     <div className="news-card animate-fade-in">
