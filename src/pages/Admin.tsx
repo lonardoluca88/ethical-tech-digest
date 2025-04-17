@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Pencil, Trash2, Plus, FileText, PaintBucket, Mail, HelpCircle } from 'lucide-react';
+import { Pencil, Trash2, Plus, FileText, PaintBucket, Mail, HelpCircle, RefreshCw } from 'lucide-react';
 import AdminNewsForm from '@/components/AdminNewsForm';
 import SourcesManager from '@/components/SourcesManager';
 import StylesCustomizer from '@/components/StylesCustomizer';
@@ -16,6 +15,7 @@ import EmailSettings from '@/components/EmailSettings';
 import InstallationGuide from '@/components/InstallationGuide';
 import { toast } from 'sonner';
 import { CategoryIcon, getCategoryName } from '@/components/icons/CategoryIcons';
+import { NewsFetchingService } from '@/lib/newsFetchingService';
 
 const STORAGE_KEYS = {
   NEWS: 'ethicalTechDigest_news',
@@ -30,9 +30,9 @@ const Admin = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentNewsItem, setCurrentNewsItem] = useState<NewsItem | undefined>();
   const [activeTab, setActiveTab] = useState("news");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   useEffect(() => {
-    // Load data from localStorage or use dummy data as fallback
     const savedNews = localStorage.getItem(STORAGE_KEYS.NEWS);
     const savedSources = localStorage.getItem(STORAGE_KEYS.SOURCES);
     const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
@@ -42,7 +42,6 @@ const Admin = () => {
     setSettings(savedSettings ? JSON.parse(savedSettings) : defaultAppSettings);
   }, []);
   
-  // Save data to localStorage whenever it changes
   useEffect(() => {
     if (news.length > 0) {
       localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(news));
@@ -58,6 +57,30 @@ const Admin = () => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
   }, [settings]);
+  
+  const handleRefreshNews = async () => {
+    setIsRefreshing(true);
+    
+    try {
+      const result = await NewsFetchingService.refreshNews();
+      
+      if (result.success) {
+        const updatedNewsStr = localStorage.getItem(STORAGE_KEYS.NEWS);
+        if (updatedNewsStr) {
+          setNews(JSON.parse(updatedNewsStr));
+        }
+        
+        toast.success(`Ricerca notizie completata: ${result.newArticlesCount} nuovi articoli trovati`);
+      } else {
+        toast.error(`Errore durante la ricerca: ${result.message}`);
+      }
+    } catch (error) {
+      toast.error('Errore durante la ricerca delle notizie');
+      console.error('Error refreshing news:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   const handleEditNews = (newsItem: NewsItem) => {
     setCurrentNewsItem(newsItem);
@@ -78,11 +101,9 @@ const Admin = () => {
   
   const handleSaveNews = (newsItem: NewsItem) => {
     if (currentNewsItem) {
-      // Update existing news
       setNews(news.map(item => item.id === newsItem.id ? newsItem : item));
       toast.success('Notizia aggiornata con successo');
     } else {
-      // Add new news
       setNews([...news, newsItem]);
       toast.success('Notizia aggiunta con successo');
     }
@@ -105,7 +126,6 @@ const Admin = () => {
     return new Date(dateString).toLocaleDateString('it-IT');
   };
 
-  // Get the actual source name for display
   const getSourceName = (sourceId: string) => {
     const source = sources.find(s => s.id === sourceId);
     return source?.name || 'Sconosciuta';
@@ -155,7 +175,17 @@ const Admin = () => {
           </TabsList>
           
           <TabsContent value="news" className="border-none p-0 mt-4">
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-4 gap-2">
+              <Button 
+                onClick={handleRefreshNews} 
+                className="flex items-center gap-1" 
+                variant="outline"
+                disabled={isRefreshing || sources.length === 0}
+              >
+                <RefreshCw size={16} className={`${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Ricerca in corso...' : 'Ricerca Notizie'}
+              </Button>
+              
               <Button onClick={handleAddNews} className="flex items-center gap-1" disabled={sources.length === 0}>
                 <Plus size={16} />
                 Aggiungi Notizia
