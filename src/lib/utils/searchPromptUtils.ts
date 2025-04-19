@@ -27,3 +27,4 @@ export const generateSearchPrompt = (source: NewsSource, category: NewsCategory)
     È CRUCIALE che tu risponda SOLO con un array JSON valido contenente gli oggetti delle notizie, nient'altro.
   `;
 };
+

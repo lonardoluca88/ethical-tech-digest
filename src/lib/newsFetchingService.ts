@@ -1,4 +1,3 @@
-
 import { NewsItem, NewsSource } from '@/lib/types';
 import { PerplexitySearchService } from './perplexitySearchService';
 import { NewsSchedulerService } from './services/newsSchedulerService';
@@ -38,6 +37,23 @@ export class NewsFetchingService {
         message: `Failed to check if news should be fetched: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
+  }
+
+  /**
+   * Verifica se una notizia è un duplicato basandosi su URL e titolo
+   */
+  private static isDuplicate(newItem: NewsItem, existingItems: NewsItem[]): boolean {
+    return existingItems.some(existing => 
+      existing.url === newItem.url || 
+      this.normalizeTitle(existing.title) === this.normalizeTitle(newItem.title)
+    );
+  }
+
+  /**
+   * Normalizza il titolo per il confronto (rimuove spazi extra e converte in minuscolo)
+   */
+  private static normalizeTitle(title: string): string {
+    return title.toLowerCase().trim().replace(/\s+/g, ' ');
   }
 
   /**
@@ -82,12 +98,14 @@ export class NewsFetchingService {
             console.log(`Cercando notizie da ${source.name} per la categoria ${category}...`);
             const newsItems = await PerplexitySearchService.searchNewsFromSource(source, category);
             
-            // Add non-duplicate items
+            // Add only non-duplicate items
             for (const item of newsItems) {
-              if (!existingNews.some(existingItem => existingItem.url === item.url)) {
+              if (!this.isDuplicate(item, allNews)) {
                 allNews.push(item);
                 newArticlesCount++;
                 console.log(`Nuovo articolo trovato: ${item.title}`);
+              } else {
+                console.log(`Articolo duplicato saltato: ${item.title}`);
               }
             }
           } catch (categoryError) {
