@@ -56,4 +56,12 @@ export class NewsStorageService {
       console.log('Dummy news added to localStorage');
     }
   }
+  
+  /**
+   * Pulisce l'archivio notizie
+   */
+  static clearNewsArchive(): void {
+    localStorage.removeItem(STORAGE_KEYS.NEWS);
+    console.log('Archivio notizie svuotato');
+  }
 }

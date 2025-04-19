@@ -1,3 +1,4 @@
+
 import { NewsItem, NewsSource } from '@/lib/types';
 import { PerplexitySearchService } from './perplexitySearchService';
 import { NewsSchedulerService } from './services/newsSchedulerService';
@@ -45,7 +46,9 @@ export class NewsFetchingService {
   private static isDuplicate(newItem: NewsItem, existingItems: NewsItem[]): boolean {
     return existingItems.some(existing => 
       existing.url === newItem.url || 
-      this.normalizeTitle(existing.title) === this.normalizeTitle(newItem.title)
+      this.normalizeTitle(existing.title) === this.normalizeTitle(newItem.title) ||
+      (existing.summary && newItem.summary && 
+       this.calculateSimilarity(existing.summary, newItem.summary) > 0.8)
     );
   }
 
@@ -54,6 +57,27 @@ export class NewsFetchingService {
    */
   private static normalizeTitle(title: string): string {
     return title.toLowerCase().trim().replace(/\s+/g, ' ');
+  }
+  
+  /**
+   * Calcola la similarità tra due stringhe (0-1)
+   * Usa una versione semplificata di Jaccard similarity
+   */
+  private static calculateSimilarity(str1: string, str2: string): number {
+    const set1 = new Set(this.normalizeTitle(str1).split(' ').filter(word => word.length > 3));
+    const set2 = new Set(this.normalizeTitle(str2).split(' ').filter(word => word.length > 3));
+    
+    if (set1.size === 0 || set2.size === 0) return 0;
+    
+    let intersection = 0;
+    for (const word of set1) {
+      if (set2.has(word)) {
+        intersection++;
+      }
+    }
+    
+    const union = set1.size + set2.size - intersection;
+    return intersection / union;
   }
 
   /**
@@ -98,12 +122,18 @@ export class NewsFetchingService {
             console.log(`Cercando notizie da ${source.name} per la categoria ${category}...`);
             const newsItems = await PerplexitySearchService.searchNewsFromSource(source, category);
             
-            // Add only non-duplicate items
+            // Add only non-duplicate items with valid URLs
             for (const item of newsItems) {
+              if (!item.url || (!item.url.startsWith('http://') && !item.url.startsWith('https://'))) {
+                console.warn(`URL non valido, articolo saltato: ${item.title}`);
+                continue;
+              }
+              
               if (!this.isDuplicate(item, allNews)) {
                 allNews.push(item);
                 newArticlesCount++;
                 console.log(`Nuovo articolo trovato: ${item.title}`);
+                console.log(`URL: ${item.url}`);
               } else {
                 console.log(`Articolo duplicato saltato: ${item.title}`);
               }
@@ -128,6 +158,26 @@ export class NewsFetchingService {
       return {
         success: false,
         message: `Failed to fetch news: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
+  /**
+   * Pulisce l'archivio notizie e cerca nuove notizie
+   */
+  static async clearAndRefreshNews(): Promise<FetchNewsResult> {
+    try {
+      // Pulisce l'archivio notizie
+      NewsStorageService.clearNewsArchive();
+      console.log("Archivio notizie svuotato, ricerca nuove notizie...");
+      
+      // Cerca nuove notizie
+      return await this.fetchNews();
+    } catch (error) {
+      console.error('Error clearing and refreshing news:', error);
+      return {
+        success: false,
+        message: `Failed to clear and refresh news: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }

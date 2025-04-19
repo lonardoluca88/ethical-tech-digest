@@ -1,3 +1,4 @@
+
 import { NewsCategory, NewsSource } from '@/lib/types';
 import { ApiKeyService } from './apiKeyService';
 import { PerplexitySearchResponse, NewsSearchResult } from './types/perplexityTypes';
@@ -53,7 +54,7 @@ export class PerplexityApiService {
               messages: [
                 {
                   role: 'system',
-                  content: 'Sei un assistente specializzato nella ricerca di notizie recenti sui risvolti etici delle nuove tecnologie. Rispondi solo con JSON parsabile. Cerca SOLO notizie degli ultimi 7 giorni, idealmente 2-3 giorni.'
+                  content: 'Sei un assistente specializzato nella ricerca di notizie recenti sui risvolti etici delle nuove tecnologie. Rispondi solo con JSON parsabile. Cerca SOLO notizie degli ultimi 7 giorni, idealmente 2-3 giorni. Assicurati che TUTTI gli URL siano completi, funzionanti e accessibili.'
                 },
                 {
                   role: 'user',
@@ -64,7 +65,8 @@ export class PerplexityApiService {
               top_p: 0.9,
               max_tokens: 1000,
               search_domain_filter: [searchDomain],
-              search_recency_filter: 'day'
+              search_recency_filter: 'day',
+              freq_penalty: 0.5
             }),
           });
           
@@ -101,13 +103,24 @@ export class PerplexityApiService {
             
             console.log(`Trovati ${results.length} risultati per ${source.name} nella categoria ${category}`);
             
-            if (results.length === 0) {
-              console.warn(`Nessun risultato trovato per ${source.name} nella categoria ${category}`);
+            // Valida gli URL prima di restituire i risultati
+            const validatedResults = results.filter(result => {
+              const isValidUrl = result.url && 
+                (result.url.startsWith('http://') || result.url.startsWith('https://'));
+              
+              if (!isValidUrl) {
+                console.warn(`URL non valido scartato: ${result.url}`);
+              }
+              return isValidUrl;
+            });
+            
+            if (validatedResults.length === 0) {
+              console.warn(`Nessun risultato con URL valido trovato per ${source.name} nella categoria ${category}`);
             } else {
-              console.log('Primo articolo trovato:', results[0].title, results[0].date);
+              console.log('Primo articolo trovato:', validatedResults[0].title, validatedResults[0].date);
             }
             
-            return results;
+            return validatedResults;
           } catch (parseError) {
             console.error(`Errore parsing JSON (tentativo ${attempt}):`, parseError, 'Contenuto:', content);
             if (attempt === MAX_RETRIES) {

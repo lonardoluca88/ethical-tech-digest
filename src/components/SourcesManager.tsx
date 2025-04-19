@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { NewsSource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import AddEditSourceDialog from './sources/AddEditSourceDialog';
 import SourcesTable from './sources/SourcesTable';
@@ -22,6 +23,7 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [isClearingAndRefreshing, setIsClearingAndRefreshing] = useState(false);
 
   const handleRefreshNews = async () => {
     setIsRefreshing(true);
@@ -44,6 +46,34 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
       console.error('Error refreshing news:', error);
     } finally {
       setIsRefreshing(false);
+    }
+  };
+  
+  const handleClearAndRefreshNews = async () => {
+    if (!confirm('Questa azione svuoterà completamente l\'archivio notizie e cercherà nuove notizie. Procedere?')) {
+      return;
+    }
+    
+    setIsClearingAndRefreshing(true);
+    
+    try {
+      toast.info('Pulizia archivio e ricerca nuove notizie in corso...', { duration: 3000 });
+      const result = await NewsFetchingService.clearAndRefreshNews();
+      
+      if (result.success) {
+        if (result.newArticlesCount && result.newArticlesCount > 0) {
+          toast.success(`Archivio pulito. Ricerca completata: ${result.newArticlesCount} nuovi articoli trovati`);
+        } else {
+          toast.info('Archivio pulito. Nessun nuovo articolo trovato.');
+        }
+      } else {
+        toast.error(`Errore durante la pulizia e ricerca: ${result.message}`);
+      }
+    } catch (error) {
+      toast.error('Errore durante la pulizia e ricerca delle notizie');
+      console.error('Error clearing and refreshing news:', error);
+    } finally {
+      setIsClearingAndRefreshing(false);
     }
   };
 
@@ -117,6 +147,15 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Gestione Fonti</h2>
         <div className="flex gap-2">
+          <Button 
+            onClick={handleClearAndRefreshNews} 
+            size="sm"
+            variant="destructive"
+            disabled={isClearingAndRefreshing || sources.length === 0}
+          >
+            <Trash2 size={16} className="mr-1" />
+            {isClearingAndRefreshing ? 'Pulizia in corso...' : 'Pulisci e Aggiorna'}
+          </Button>
           <Button 
             onClick={handleRefreshNews} 
             size="sm"

@@ -25,6 +25,7 @@ export const generateSearchPrompt = (source: NewsSource, category: NewsCategory)
     - date: la data di pubblicazione in formato YYYY-MM-DD (usa la data più recente possibile)
     
     È CRUCIALE che tu risponda SOLO con un array JSON valido contenente gli oggetti delle notizie, nient'altro.
+    È FONDAMENTALE che ogni URL sia funzionante, completo e direttamente accessibile senza redirezioni o errori.
+    NON fornire URL parziali o incompleti. Tutti gli URL devono iniziare con http:// o https://.
   `;
 };
-
