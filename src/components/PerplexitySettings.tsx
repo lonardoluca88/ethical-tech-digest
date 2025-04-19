@@ -8,24 +8,50 @@ import { RefreshCw, Key, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { PerplexitySearchService } from '@/lib/perplexitySearchService';
 import { NewsFetchingService } from '@/lib/newsFetchingService';
+import { supabase } from '@/integrations/supabase/client';
 
 const PerplexitySettings: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>('');
   const [isTestingConnection, setIsTestingConnection] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(true);
 
   useEffect(() => {
+    // Verifica la connessione a Supabase
+    const checkSupabaseConnection = async () => {
+      try {
+        await supabase.from('dummy').select('*').limit(1);
+        setIsSupabaseConnected(true);
+      } catch (error) {
+        console.error('Errore di connessione a Supabase:', error);
+        setIsSupabaseConnected(false);
+      }
+    };
+    
+    checkSupabaseConnection();
+    
     const loadApiKey = async () => {
-      const savedKey = await PerplexitySearchService.getApiKey();
-      if (savedKey) {
-        setApiKey(savedKey);
+      if (!isSupabaseConnected) return;
+      
+      try {
+        const savedKey = await PerplexitySearchService.getApiKey();
+        if (savedKey) {
+          setApiKey(savedKey);
+        }
+      } catch (error) {
+        console.error('Errore nel caricare l\'API key:', error);
       }
     };
     
     loadApiKey();
-  }, []);
+  }, [isSupabaseConnected]);
 
   const handleSaveKey = async () => {
+    if (!isSupabaseConnected) {
+      toast.error('Non è possibile salvare la chiave: Supabase non è connesso');
+      return;
+    }
+    
     setIsSaving(true);
     
     try {
@@ -40,6 +66,11 @@ const PerplexitySettings: React.FC = () => {
   };
 
   const handleClearKey = async () => {
+    if (!isSupabaseConnected) {
+      toast.error('Non è possibile rimuovere la chiave: Supabase non è connesso');
+      return;
+    }
+    
     try {
       await PerplexitySearchService.clearApiKey();
       setApiKey('');
@@ -53,6 +84,11 @@ const PerplexitySettings: React.FC = () => {
   const handleTestConnection = async () => {
     if (!apiKey) {
       toast.error('Inserisci prima una API key');
+      return;
+    }
+    
+    if (!isSupabaseConnected) {
+      toast.error('Non è possibile testare la connessione: Supabase non è connesso');
       return;
     }
 
@@ -87,6 +123,15 @@ const PerplexitySettings: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {!isSupabaseConnected && (
+          <Alert className="mb-4" variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Connessione a Supabase non riuscita. Verifica che il progetto Supabase sia correttamente configurato.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Alert className="mb-4" variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -112,7 +157,7 @@ const PerplexitySettings: React.FC = () => {
       </CardContent>
       <CardFooter className="flex gap-2 justify-between">
         <div>
-          <Button variant="outline" onClick={handleClearKey} disabled={!apiKey}>
+          <Button variant="outline" onClick={handleClearKey} disabled={!apiKey || !isSupabaseConnected}>
             Rimuovi chiave
           </Button>
         </div>
@@ -120,7 +165,7 @@ const PerplexitySettings: React.FC = () => {
           <Button 
             variant="outline" 
             onClick={handleTestConnection} 
-            disabled={!apiKey || isTestingConnection}
+            disabled={!apiKey || isTestingConnection || !isSupabaseConnected}
             className="flex items-center gap-1"
           >
             <RefreshCw size={16} className={isTestingConnection ? 'animate-spin' : ''} />
@@ -128,7 +173,7 @@ const PerplexitySettings: React.FC = () => {
           </Button>
           <Button 
             onClick={handleSaveKey} 
-            disabled={!apiKey || isSaving}
+            disabled={!apiKey || isSaving || !isSupabaseConnected}
             className="flex items-center gap-1"
           >
             <Save size={16} />
