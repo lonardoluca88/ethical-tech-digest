@@ -1,8 +1,13 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Get Supabase credentials from window.__SUPABASE_CLIENT__ which is set by Lovable
+const supabaseData = (window as any).__SUPABASE_CLIENT__ || {};
+const supabaseUrl = supabaseData.supabaseUrl || '';
+const supabaseAnonKey = supabaseData.supabaseAnonKey || '';
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Supabase credentials not found. Make sure Supabase is properly connected in Lovable.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
