@@ -10,11 +10,15 @@ import { PerplexitySearchService } from '@/lib/perplexitySearchService';
 import { NewsFetchingService } from '@/lib/newsFetchingService';
 import { supabase } from '@/lib/supabaseClient';
 
+// Chiave per localStorage
+const PERPLEXITY_API_KEY_STORAGE = 'ethical_tech_digest_perplexity_key';
+
 const PerplexitySettings: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>('');
   const [isTestingConnection, setIsTestingConnection] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(true);
+  const [isUsingLocalStorage, setIsUsingLocalStorage] = useState<boolean>(false);
 
   useEffect(() => {
     // Verifica la connessione a Supabase
@@ -22,26 +26,56 @@ const PerplexitySettings: React.FC = () => {
       try {
         // Try to get Supabase status with a simple call
         const { data, error } = await supabase.auth.getSession();
-        setIsSupabaseConnected(!error);
+        
         if (error) {
           console.error('Errore di connessione a Supabase:', error);
           setIsSupabaseConnected(false);
+          setIsUsingLocalStorage(true);
+        } else {
+          setIsSupabaseConnected(true);
+          
+          // Prova a testare la funzione Edge
+          try {
+            await supabase.functions.invoke('get-perplexity-key');
+          } catch (edgeFunctionError) {
+            console.error('Errore con la funzione Edge:', edgeFunctionError);
+            setIsUsingLocalStorage(true);
+          }
         }
       } catch (error) {
         console.error('Errore di connessione a Supabase:', error);
         setIsSupabaseConnected(false);
+        setIsUsingLocalStorage(true);
       }
     };
     
     checkSupabaseConnection();
     
     const loadApiKey = async () => {
-      if (!isSupabaseConnected) return;
-      
       try {
-        const savedKey = await PerplexitySearchService.getApiKey();
-        if (savedKey) {
-          setApiKey(savedKey);
+        // Prima prova dal localStorage se la modalità localStorage è attiva
+        if (isUsingLocalStorage) {
+          const localKey = localStorage.getItem(PERPLEXITY_API_KEY_STORAGE);
+          if (localKey) {
+            setApiKey(localKey);
+            return;
+          }
+        }
+        
+        // Altrimenti prova da Supabase se connesso
+        if (isSupabaseConnected && !isUsingLocalStorage) {
+          try {
+            const savedKey = await PerplexitySearchService.getApiKey();
+            if (savedKey) {
+              setApiKey(savedKey);
+            }
+          } catch (error) {
+            console.error('Errore nel caricare l\'API key da Supabase:', error);
+            // Se fallisce, passa a localStorage
+            setIsUsingLocalStorage(true);
+            const localKey = localStorage.getItem(PERPLEXITY_API_KEY_STORAGE);
+            if (localKey) setApiKey(localKey);
+          }
         }
       } catch (error) {
         console.error('Errore nel caricare l\'API key:', error);
@@ -49,19 +83,32 @@ const PerplexitySettings: React.FC = () => {
     };
     
     loadApiKey();
-  }, [isSupabaseConnected]);
+  }, [isSupabaseConnected, isUsingLocalStorage]);
 
   const handleSaveKey = async () => {
-    if (!isSupabaseConnected) {
-      toast.error('Non è possibile salvare la chiave: Supabase non è connesso');
-      return;
-    }
-    
     setIsSaving(true);
     
     try {
-      await PerplexitySearchService.setApiKey(apiKey);
-      toast.success('API key salvata con successo');
+      if (isUsingLocalStorage) {
+        // Salva nel localStorage
+        localStorage.setItem(PERPLEXITY_API_KEY_STORAGE, apiKey);
+        // Aggiorna anche il servizio
+        PerplexitySearchService.setLocalApiKey(apiKey);
+        toast.success('API key salvata in localStorage');
+      } else {
+        // Prova a salvare su Supabase
+        try {
+          await PerplexitySearchService.setApiKey(apiKey);
+          toast.success('API key salvata con successo');
+        } catch (error) {
+          console.error('Errore nel salvare l\'API key su Supabase:', error);
+          // Fallback a localStorage
+          setIsUsingLocalStorage(true);
+          localStorage.setItem(PERPLEXITY_API_KEY_STORAGE, apiKey);
+          PerplexitySearchService.setLocalApiKey(apiKey);
+          toast.success('API key salvata in localStorage (modalità fallback)');
+        }
+      }
     } catch (error) {
       toast.error('Errore nel salvare l\'API key');
       console.error('Error saving API key:', error);
@@ -71,13 +118,24 @@ const PerplexitySettings: React.FC = () => {
   };
 
   const handleClearKey = async () => {
-    if (!isSupabaseConnected) {
-      toast.error('Non è possibile rimuovere la chiave: Supabase non è connesso');
-      return;
-    }
-    
     try {
-      await PerplexitySearchService.clearApiKey();
+      if (isUsingLocalStorage) {
+        // Rimuovi dal localStorage
+        localStorage.removeItem(PERPLEXITY_API_KEY_STORAGE);
+        PerplexitySearchService.clearLocalApiKey();
+      } else {
+        // Prova a rimuovere da Supabase
+        try {
+          await PerplexitySearchService.clearApiKey();
+        } catch (error) {
+          console.error('Errore nella rimozione dell\'API key da Supabase:', error);
+          // Fallback a localStorage
+          setIsUsingLocalStorage(true);
+          localStorage.removeItem(PERPLEXITY_API_KEY_STORAGE);
+          PerplexitySearchService.clearLocalApiKey();
+        }
+      }
+      
       setApiKey('');
       toast.success('API key rimossa');
     } catch (error) {
@@ -92,15 +150,24 @@ const PerplexitySettings: React.FC = () => {
       return;
     }
     
-    if (!isSupabaseConnected) {
-      toast.error('Non è possibile testare la connessione: Supabase non è connesso');
-      return;
-    }
-
     setIsTestingConnection(true);
     
     try {
-      await PerplexitySearchService.setApiKey(apiKey);
+      if (isUsingLocalStorage) {
+        // Imposta la chiave direttamente nel servizio
+        PerplexitySearchService.setLocalApiKey(apiKey);
+      } else {
+        // Prova a impostare su Supabase
+        try {
+          await PerplexitySearchService.setApiKey(apiKey);
+        } catch (error) {
+          console.error('Errore nell\'impostare l\'API key su Supabase:', error);
+          // Fallback a localStorage
+          setIsUsingLocalStorage(true);
+          PerplexitySearchService.setLocalApiKey(apiKey);
+        }
+      }
+      
       const result = await NewsFetchingService.refreshNews();
       
       if (result.success) {
@@ -128,11 +195,20 @@ const PerplexitySettings: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {isUsingLocalStorage && (
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Modalità localStorage attiva: la chiave API verrà salvata localmente anziché su Supabase.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {!isSupabaseConnected && (
           <Alert className="mb-4" variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Connessione a Supabase non riuscita. Verifica che il progetto Supabase sia correttamente configurato.
+              Connessione a Supabase non riuscita. La chiave verrà salvata localmente.
             </AlertDescription>
           </Alert>
         )}
@@ -162,7 +238,7 @@ const PerplexitySettings: React.FC = () => {
       </CardContent>
       <CardFooter className="flex gap-2 justify-between">
         <div>
-          <Button variant="outline" onClick={handleClearKey} disabled={!apiKey || !isSupabaseConnected}>
+          <Button variant="outline" onClick={handleClearKey} disabled={!apiKey}>
             Rimuovi chiave
           </Button>
         </div>
@@ -170,7 +246,7 @@ const PerplexitySettings: React.FC = () => {
           <Button 
             variant="outline" 
             onClick={handleTestConnection} 
-            disabled={!apiKey || isTestingConnection || !isSupabaseConnected}
+            disabled={!apiKey || isTestingConnection}
             className="flex items-center gap-1"
           >
             <RefreshCw size={16} className={isTestingConnection ? 'animate-spin' : ''} />
@@ -178,7 +254,7 @@ const PerplexitySettings: React.FC = () => {
           </Button>
           <Button 
             onClick={handleSaveKey} 
-            disabled={!apiKey || isSaving || !isSupabaseConnected}
+            disabled={!apiKey || isSaving}
             className="flex items-center gap-1"
           >
             <Save size={16} />

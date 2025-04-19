@@ -21,45 +21,104 @@ interface NewsSearchResult {
   category?: NewsCategory;
 }
 
+// Chiave per localStorage
+const PERPLEXITY_API_KEY_STORAGE = 'ethical_tech_digest_perplexity_key';
+
 export class PerplexitySearchService {
   private static apiKey: string | null = null;
   
   static async setApiKey(key: string): Promise<void> {
-    const { data, error } = await supabase.functions.invoke('set-perplexity-key', {
-      body: { key }
-    });
-    
-    if (error) {
-      throw new Error('Errore nel salvare l\'API key: ' + error.message);
+    try {
+      const { data, error } = await supabase.functions.invoke('set-perplexity-key', {
+        body: { key }
+      });
+      
+      if (error) {
+        throw new Error('Errore nel salvare l\'API key: ' + error.message);
+      }
+      
+      this.apiKey = key;
+    } catch (error) {
+      // Se la funzione Edge fallisce, usa localStorage come fallback
+      this.setLocalApiKey(key);
+      throw error; // Rilancia l'errore per gestirlo nel componente
     }
-    
+  }
+  
+  // Nuovo metodo per impostare la chiave direttamente nel localStorage
+  static setLocalApiKey(key: string): void {
+    localStorage.setItem(PERPLEXITY_API_KEY_STORAGE, key);
     this.apiKey = key;
   }
   
   static async getApiKey(): Promise<string | null> {
+    // Se abbiamo già la chiave in memoria, la restituiamo
     if (this.apiKey) return this.apiKey;
     
-    const { data, error } = await supabase.functions.invoke('get-perplexity-key');
-    
-    if (error) {
+    try {
+      // Prova prima da Supabase
+      const { data, error } = await supabase.functions.invoke('get-perplexity-key');
+      
+      if (error) {
+        // Se c'è un errore, prova da localStorage
+        const localKey = localStorage.getItem(PERPLEXITY_API_KEY_STORAGE);
+        
+        if (localKey) {
+          this.apiKey = localKey;
+          return localKey;
+        }
+        
+        console.error('Errore nel recuperare l\'API key:', error);
+        return null;
+      }
+      
+      if (data?.key) {
+        this.apiKey = data.key;
+        return data.key;
+      }
+      
+      // Se non c'è la chiave su Supabase, prova da localStorage
+      const localKey = localStorage.getItem(PERPLEXITY_API_KEY_STORAGE);
+      
+      if (localKey) {
+        this.apiKey = localKey;
+        return localKey;
+      }
+      
+      return null;
+    } catch (error) {
+      // Se fallisce la chiamata, prova da localStorage
+      const localKey = localStorage.getItem(PERPLEXITY_API_KEY_STORAGE);
+      
+      if (localKey) {
+        this.apiKey = localKey;
+        return localKey;
+      }
+      
       console.error('Errore nel recuperare l\'API key:', error);
       return null;
     }
-    
-    if (data?.key) {
-      this.apiKey = data.key;
-    }
-    
-    return this.apiKey;
   }
   
   static async clearApiKey(): Promise<void> {
-    const { error } = await supabase.functions.invoke('clear-perplexity-key');
-    
-    if (error) {
-      throw new Error('Errore nella rimozione dell\'API key: ' + error.message);
+    try {
+      const { error } = await supabase.functions.invoke('clear-perplexity-key');
+      
+      if (error) {
+        throw new Error('Errore nella rimozione dell\'API key: ' + error.message);
+      }
+      
+      this.apiKey = null;
+    } catch (error) {
+      // Se la funzione Edge fallisce, cancella dal localStorage
+      this.clearLocalApiKey();
+      throw error; // Rilancia l'errore per gestirlo nel componente
     }
-    
+  }
+  
+  // Nuovo metodo per cancellare la chiave dal localStorage
+  static clearLocalApiKey(): void {
+    localStorage.removeItem(PERPLEXITY_API_KEY_STORAGE);
     this.apiKey = null;
   }
   
