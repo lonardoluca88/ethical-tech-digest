@@ -1,30 +1,12 @@
 
 import { NewsCategory, NewsSource } from '@/lib/types';
 import { ApiKeyService } from './apiKeyService';
-
-interface PerplexitySearchResponse {
-  id: string;
-  choices: {
-    index: number;
-    message: {
-      content: string;
-      role: string;
-    };
-    finish_reason: string;
-  }[];
-}
-
-interface NewsSearchResult {
-  title: string;
-  url: string;
-  summary: string;
-  date: string;
-  category?: NewsCategory;
-}
+import { PerplexitySearchResponse, NewsSearchResult } from './types/perplexityTypes';
+import { generateSearchPrompt } from './utils/searchPromptUtils';
 
 export class PerplexityApiService {
   /**
-   * Esegue una ricerca di notizie utilizzando l'API di Perplexity
+   * Search for news using the Perplexity API
    */
   static async searchNewsFromSource(source: NewsSource, category: NewsCategory): Promise<NewsSearchResult[]> {
     const apiKey = await ApiKeyService.getApiKey();
@@ -33,24 +15,7 @@ export class PerplexityApiService {
       throw new Error('API key non configurata. Configura una Perplexity API key nelle impostazioni.');
     }
     
-    const keywords = this.getCategoryKeywords(category);
-    const keywordsStr = keywords.join(', ');
-    
-    const searchPrompt = `
-      Cerca notizie recenti (massimo degli ultimi 7 giorni) riguardanti i risvolti etici della tecnologia, 
-      specificamente nel campo della ${this.getCategoryName(category)} (${keywordsStr}) 
-      dal sito ${source.url}.
-      
-      Trova al massimo 3 notizie rilevanti che discutono in qualche modo di etica e ${this.getCategoryName(category)}.
-      
-      Per ogni notizia fornisci le seguenti informazioni in formato JSON:
-      - title: il titolo dell'articolo
-      - url: l'URL completo dell'articolo
-      - summary: un breve riassunto dell'articolo in italiano (massimo 200 caratteri) che menzioni gli aspetti etici
-      - date: la data di pubblicazione in formato YYYY-MM-DD
-      
-      Rispondi SOLO con un array JSON valido contenente gli oggetti delle notizie, nient'altro.
-    `;
+    const searchPrompt = generateSearchPrompt(source, category);
     
     try {
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -92,13 +57,10 @@ export class PerplexityApiService {
         throw new Error('Risposta vuota dall\'API');
       }
       
-      // Estrai il JSON dalla risposta dell'API
       try {
-        // Cerca di estrarre il JSON dalla risposta (nel caso ci siano commenti)
         const jsonMatch = content.match(/\[[\s\S]*\]/);
         const jsonString = jsonMatch ? jsonMatch[0] : content;
-        const searchResults = JSON.parse(jsonString) as NewsSearchResult[];
-        return searchResults;
+        return JSON.parse(jsonString) as NewsSearchResult[];
       } catch (parseError) {
         console.error('Errore parsing JSON:', parseError, 'Contenuto:', content);
         throw new Error('Impossibile interpretare la risposta dell\'API come JSON');
@@ -106,34 +68,6 @@ export class PerplexityApiService {
     } catch (error) {
       console.error(`Errore durante la ricerca sul sito ${source.url}:`, error);
       throw error;
-    }
-  }
-
-  /**
-   * Ottieni il nome localizzato della categoria
-   */
-  private static getCategoryName(category: NewsCategory): string {
-    switch (category) {
-      case 'ai': return 'Intelligenza Artificiale';
-      case 'robotics': return 'Robotica';
-      case 'biotech': return 'Biotecnologia';
-      default: return 'Tecnologia';
-    }
-  }
-  
-  /**
-   * Ottieni parole chiave per la categoria
-   */
-  private static getCategoryKeywords(category: NewsCategory): string[] {
-    switch (category) {
-      case 'ai':
-        return ['artificial intelligence', 'machine learning', 'deep learning', 'neural network', 'AI ethics', 'generative AI', 'large language model', 'LLM'];
-      case 'robotics':
-        return ['robotics', 'automation', 'autonomous', 'robot', 'drone', 'robot ethics', 'robotic process', 'human-robot interaction'];
-      case 'biotech':
-        return ['biotechnology', 'genomics', 'crispr', 'genetic engineering', 'bioethics', 'synthetic biology', 'gene editing', 'biotech ethics'];
-      default:
-        return ['ethics', 'technology', 'digital ethics'];
     }
   }
 }
