@@ -20,8 +20,8 @@ const PerplexitySettings: React.FC = () => {
     // Verifica la connessione a Supabase
     const checkSupabaseConnection = async () => {
       try {
-        // Use the rpc method to check connection instead of querying a table
-        const { error } = await supabase.rpc('version');
+        // Try to get Supabase status with a simple call
+        const { data, error } = await supabase.auth.getSession();
         setIsSupabaseConnected(!error);
         if (error) {
           console.error('Errore di connessione a Supabase:', error);
