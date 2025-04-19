@@ -1,4 +1,3 @@
-
 import { NewsItem, NewsCategory, NewsSource } from '@/lib/types';
 import { dummyNews } from '@/lib/dummyData';
 import { PerplexitySearchService } from './perplexitySearchService';
@@ -123,7 +122,7 @@ export class NewsFetchingService {
       }
       
       // Check if Perplexity API key is configured
-      if (!PerplexitySearchService.getApiKey()) {
+      if (!await PerplexitySearchService.getApiKey()) {
         return {
           success: false,
           message: 'API key Perplexity non configurata. Configura una chiave nelle impostazioni.',
@@ -145,26 +144,15 @@ export class NewsFetchingService {
           for (const category of categories) {
             try {
               // Fetch news using Perplexity
-              const searchResults = await PerplexitySearchService.searchNewsFromSource(source, category);
+              const newsItems = await PerplexitySearchService.searchNewsFromSource(source, category);
               
-              // Convert search results to NewsItem objects
-              for (const result of searchResults) {
+              // Add non-duplicate items to allNews
+              for (const item of newsItems) {
                 // Check if article with same URL already exists
-                const isDuplicate = existingNews.some(item => item.url === result.url);
+                const isDuplicate = existingNews.some(existingItem => existingItem.url === item.url);
                 
                 if (!isDuplicate) {
-                  const newsItem: NewsItem = {
-                    id: crypto.randomUUID(),
-                    title: result.title,
-                    summary: result.summary,
-                    url: result.url,
-                    date: result.date || new Date().toISOString().split('T')[0],
-                    sourceId: source.id,
-                    category: category,
-                    imageUrl: `https://picsum.photos/seed/${result.title.replace(/\s+/g, '')}/400/300`
-                  };
-                  
-                  allNews.push(newsItem);
+                  allNews.push(item);
                   newArticlesCount++;
                 }
               }
