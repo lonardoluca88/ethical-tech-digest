@@ -1,4 +1,3 @@
-
 (function() {
   // Configurazione widget
   const defaultConfig = {
@@ -85,19 +84,17 @@
     }
   }
   
-  // Fetch news
+  // Fetch news using the integrated system
   async function fetchNews() {
     try {
-      // This is a placeholder that the main application will extend with real implementation
-      // The widget itself doesn't have direct access to news fetching logic
-      // It just schedules when news should be fetched
+      // This is a placeholder that will trigger the application's fetchNews function
       logger.info('Widget triggered news fetch');
-      
-      // Update last fetch time
-      localStorage.setItem('ethicalTechDigest_lastFetch', new Date().toISOString());
       
       // Trigger a custom event that the main app can listen for
       window.dispatchEvent(new CustomEvent('ethicalTechDigest_fetchNews'));
+      
+      // Update last fetch time
+      localStorage.setItem('ethicalTechDigest_lastFetch', new Date().toISOString());
       
       return {
         success: true,

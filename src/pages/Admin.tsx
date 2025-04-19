@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Pencil, Trash2, Plus, FileText, PaintBucket, Mail, HelpCircle, RefreshCw } from 'lucide-react';
+import { Pencil, Trash2, Plus, FileText, PaintBucket, Mail, HelpCircle, RefreshCw, Search } from 'lucide-react';
 import AdminNewsForm from '@/components/AdminNewsForm';
 import SourcesManager from '@/components/SourcesManager';
 import StylesCustomizer from '@/components/StylesCustomizer';
@@ -16,6 +16,7 @@ import InstallationGuide from '@/components/InstallationGuide';
 import { toast } from 'sonner';
 import { CategoryIcon, getCategoryName } from '@/components/icons/CategoryIcons';
 import { NewsFetchingService } from '@/lib/newsFetchingService';
+import PerplexitySettings from '@/components/PerplexitySettings';
 
 const STORAGE_KEYS = {
   NEWS: 'ethicalTechDigest_news',
@@ -151,7 +152,7 @@ const Admin = () => {
           onValueChange={setActiveTab} 
           className="space-y-4"
         >
-          <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2">
             <TabsTrigger value="news" className="flex items-center gap-1">
               <FileText size={16} />
               <span className="hidden sm:inline">Notizie</span>
@@ -167,6 +168,10 @@ const Admin = () => {
             <TabsTrigger value="email" className="flex items-center gap-1">
               <Mail size={16} />
               <span className="hidden sm:inline">Email</span>
+            </TabsTrigger>
+            <TabsTrigger value="api" className="flex items-center gap-1">
+              <Search size={16} />
+              <span className="hidden sm:inline">Ricerca</span>
             </TabsTrigger>
             <TabsTrigger value="guide" className="flex items-center gap-1">
               <HelpCircle size={16} />
@@ -273,6 +278,10 @@ const Admin = () => {
               settings={settings}
               onUpdate={handleUpdateSettings}
             />
+          </TabsContent>
+          
+          <TabsContent value="api" className="border-none p-0">
+            <PerplexitySettings />
           </TabsContent>
           
           <TabsContent value="guide" className="border-none p-0">

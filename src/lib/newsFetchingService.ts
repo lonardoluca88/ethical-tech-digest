@@ -1,17 +1,12 @@
 
 import { NewsItem, NewsCategory, NewsSource } from '@/lib/types';
 import { dummyNews } from '@/lib/dummyData';
+import { PerplexitySearchService } from './perplexitySearchService';
 
 const STORAGE_KEYS = {
   NEWS: 'ethicalTechDigest_news',
   SOURCES: 'ethicalTechDigest_sources',
   LAST_FETCH: 'ethicalTechDigest_lastFetch'
-};
-
-const KEYWORDS = {
-  ai: ['artificial intelligence', 'machine learning', 'deep learning', 'neural network', 'AI ethics', 'generative AI', 'large language model', 'LLM'],
-  robotics: ['robotics', 'automation', 'autonomous', 'robot', 'drone', 'robot ethics', 'robotic process', 'human-robot interaction'],
-  biotech: ['biotechnology', 'genomics', 'crispr', 'genetic engineering', 'bioethics', 'synthetic biology', 'gene editing', 'biotech ethics']
 };
 
 export interface FetchNewsResult {
@@ -108,7 +103,7 @@ export class NewsFetchingService {
   }
 
   /**
-   * Fetches news from sources and updates storage
+   * Fetches news from sources using Perplexity AI and updates storage
    */
   static async fetchNews(): Promise<FetchNewsResult> {
     try {
@@ -127,6 +122,14 @@ export class NewsFetchingService {
         };
       }
       
+      // Check if Perplexity API key is configured
+      if (!PerplexitySearchService.getApiKey()) {
+        return {
+          success: false,
+          message: 'API key Perplexity non configurata. Configura una chiave nelle impostazioni.',
+        };
+      }
+      
       // Get existing news
       const existingNewsStr = localStorage.getItem(STORAGE_KEYS.NEWS);
       const existingNews: NewsItem[] = existingNewsStr ? JSON.parse(existingNewsStr) : [];
@@ -134,23 +137,40 @@ export class NewsFetchingService {
       // Track new articles
       let newArticlesCount = 0;
       const allNews = [...existingNews];
+      const categories: NewsCategory[] = ['ai', 'robotics', 'biotech'];
       
       // Process each source
       for (const source of sources) {
         try {
-          const articles = await this.fetchNewsFromSource(source);
-          
-          // Filter out duplicates and add new articles
-          for (const article of articles) {
-            const isDuplicate = existingNews.some(
-              existingArticle => 
-                existingArticle.title === article.title || 
-                existingArticle.url === article.url
-            );
-            
-            if (!isDuplicate) {
-              allNews.push(article);
-              newArticlesCount++;
+          for (const category of categories) {
+            try {
+              // Fetch news using Perplexity
+              const searchResults = await PerplexitySearchService.searchNewsFromSource(source, category);
+              
+              // Convert search results to NewsItem objects
+              for (const result of searchResults) {
+                // Check if article with same URL already exists
+                const isDuplicate = existingNews.some(item => item.url === result.url);
+                
+                if (!isDuplicate) {
+                  const newsItem: NewsItem = {
+                    id: crypto.randomUUID(),
+                    title: result.title,
+                    summary: result.summary,
+                    url: result.url,
+                    date: result.date || new Date().toISOString().split('T')[0],
+                    sourceId: source.id,
+                    category: category,
+                    imageUrl: `https://picsum.photos/seed/${result.title.replace(/\s+/g, '')}/400/300`
+                  };
+                  
+                  allNews.push(newsItem);
+                  newArticlesCount++;
+                }
+              }
+            } catch (categoryError) {
+              console.error(`Error fetching ${category} news from ${source.name}:`, categoryError);
+              // Continue with other categories
             }
           }
         } catch (sourceError) {
@@ -188,48 +208,6 @@ export class NewsFetchingService {
       localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(dummyNews));
       console.log('Dummy news added to localStorage');
     }
-  }
-
-  /**
-   * Fetches news from a specific source
-   * This is where you'd integrate with real news APIs
-   */
-  private static async fetchNewsFromSource(source: NewsSource): Promise<NewsItem[]> {
-    // Simulating API call with a delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Get current date
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
-    
-    // Create random number of articles (1-3)
-    const articleCount = Math.floor(Math.random() * 3) + 1;
-    const articles: NewsItem[] = [];
-    
-    // Generate some random articles based on source and categories
-    for (let i = 0; i < articleCount; i++) {
-      // Pick a random category
-      const categories: NewsCategory[] = ['ai', 'robotics', 'biotech'];
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      
-      // Pick a random keyword for that category
-      const categoryKeywords = KEYWORDS[randomCategory];
-      const keyword = categoryKeywords[Math.floor(Math.random() * categoryKeywords.length)];
-      
-      articles.push({
-        id: crypto.randomUUID(),
-        title: `New developments in ${keyword} research`,
-        summary: `Recent breakthroughs in ${keyword} are changing how we approach ${randomCategory} problems.`,
-        content: `This is a simulated article about ${keyword} in the field of ${randomCategory}. In the real implementation, this would be actual content from news sources.`,
-        url: `https://${source.url}/articles/${dateStr}/${keyword.replace(/\s+/g, '-')}`,
-        date: dateStr,
-        sourceId: source.id,
-        category: randomCategory,
-        imageUrl: `https://picsum.photos/seed/${keyword.replace(/\s+/g, '')}/400/300`
-      });
-    }
-    
-    return articles;
   }
   
   /**
