@@ -41,6 +41,16 @@ const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
 
   const source = sources.find(source => source.id === item.sourceId);
   
+  // Funzione per visualizzare un URL in formato leggibile
+  const formatUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      return `${urlObj.hostname}${urlObj.pathname.length > 15 ? urlObj.pathname.substring(0, 15) + '...' : urlObj.pathname}`;
+    } catch (e) {
+      return url.substring(0, 30) + '...';
+    }
+  };
+  
   return (
     <div className="news-card animate-fade-in">
       <div className="flex items-center gap-2 mb-2">
@@ -83,7 +93,7 @@ const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>URL dell'articolo non accessibile o non valido</p>
+                <p>URL dell'articolo non accessibile: {formatUrl(item.url)}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
