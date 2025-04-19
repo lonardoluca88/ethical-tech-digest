@@ -3,8 +3,9 @@ import React from 'react';
 import { NewsItem as NewsItemType, NewsSource } from '@/lib/types';
 import { CategoryIcon, getCategoryName } from './icons/CategoryIcons';
 import { dummySources } from '@/lib/dummyData';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, AlertCircle } from 'lucide-react';
 import { useLinkChecker } from '@/hooks/useLinkChecker';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NewsItemProps {
   item: NewsItemType;
@@ -72,7 +73,21 @@ const NewsItem: React.FC<NewsItemProps> = ({ item }) => {
           >
             Leggi articolo <ExternalLink size={12} />
           </a>
-        ) : null}
+        ) : (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-orange-500">
+                  <AlertCircle size={14} />
+                  <span className="text-xs">Link non disponibile</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>URL dell'articolo non accessibile o non valido</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     </div>
   );

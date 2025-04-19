@@ -16,16 +16,19 @@ export const generateSearchPrompt = (source: NewsSource, category: NewsCategory)
     
     È FONDAMENTALE che fornisci articoli diversi da quelli già trovati in passato e che siano il più recenti possibile.
     
+    È CRUCIALE che ogni URL fornito sia COMPLETO (inizia con http:// o https://) e FUNZIONANTE.
+    DEVI VERIFICARE che ogni URL sia accessibile e porti direttamente all'articolo citato.
+    NON fornire URL parziali o homepage generiche del sito.
+    
     Trova al massimo 3 notizie che soddisfano questi criteri.
     
     Per ogni notizia fornisci le seguenti informazioni in formato JSON:
     - title: il titolo esatto dell'articolo
-    - url: l'URL completo e funzionante dell'articolo (verifica che sia corretto e completo)
+    - url: l'URL completo e funzionante dell'articolo (VERIFICA CHE QUESTO URL SIA CORRETTO E FUNZIONANTE)
     - summary: un breve riassunto dell'articolo in italiano (massimo 200 caratteri) che evidenzi gli aspetti etici
     - date: la data di pubblicazione in formato YYYY-MM-DD (usa la data più recente possibile)
     
     È CRUCIALE che tu risponda SOLO con un array JSON valido contenente gli oggetti delle notizie, nient'altro.
-    È FONDAMENTALE che ogni URL sia funzionante, completo e direttamente accessibile senza redirezioni o errori.
-    NON fornire URL parziali o incompleti. Tutti gli URL devono iniziare con http:// o https://.
+    VERIFICA ATTENTAMENTE ogni URL prima di includerlo nella risposta per assicurarti che sia completo e funzionante.
   `;
 };

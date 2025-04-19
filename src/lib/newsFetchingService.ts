@@ -45,11 +45,30 @@ export class NewsFetchingService {
    */
   private static isDuplicate(newItem: NewsItem, existingItems: NewsItem[]): boolean {
     return existingItems.some(existing => 
-      existing.url === newItem.url || 
+      // Confronto URL normalizzati (rimuovendo parametri UTM e altri tracciamenti)
+      this.normalizeUrl(existing.url) === this.normalizeUrl(newItem.url) || 
+      // Confronto titoli normalizzati
       this.normalizeTitle(existing.title) === this.normalizeTitle(newItem.title) ||
+      // Confronto di similarità dei riassunti
       (existing.summary && newItem.summary && 
-       this.calculateSimilarity(existing.summary, newItem.summary) > 0.8)
+       this.calculateSimilarity(existing.summary, newItem.summary) > 0.75)
     );
+  }
+
+  /**
+   * Normalizza l'URL rimuovendo parametri di tracciamento
+   */
+  private static normalizeUrl(url: string): string {
+    try {
+      const parsedUrl = new URL(url);
+      // Rimozione dei parametri UTM e altri parametri di tracciamento
+      const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid'];
+      trackingParams.forEach(param => parsedUrl.searchParams.delete(param));
+      return parsedUrl.origin + parsedUrl.pathname;
+    } catch (error) {
+      // Se l'URL non è valido, restituisci l'originale
+      return url;
+    }
   }
 
   /**
@@ -124,8 +143,20 @@ export class NewsFetchingService {
             
             // Add only non-duplicate items with valid URLs
             for (const item of newsItems) {
-              if (!item.url || (!item.url.startsWith('http://') && !item.url.startsWith('https://'))) {
+              // Verifica che l'URL sia valido e completo
+              let isValidUrl = false;
+              try {
+                const url = new URL(item.url);
+                isValidUrl = (url.protocol === 'http:' || url.protocol === 'https:') && 
+                             url.hostname.length > 0 && 
+                             url.pathname !== '/';
+              } catch (e) {
+                isValidUrl = false;
+              }
+              
+              if (!isValidUrl) {
                 console.warn(`URL non valido, articolo saltato: ${item.title}`);
+                console.warn(`URL problematico: ${item.url}`);
                 continue;
               }
               

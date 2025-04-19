@@ -62,6 +62,7 @@ export class NewsStorageService {
    */
   static clearNewsArchive(): void {
     localStorage.removeItem(STORAGE_KEYS.NEWS);
-    console.log('Archivio notizie svuotato');
+    localStorage.removeItem(STORAGE_KEYS.LAST_FETCH); // Rimuovere anche l'ultimo timestamp di fetch
+    console.log('Archivio notizie e timestamp svuotati completamente');
   }
 }

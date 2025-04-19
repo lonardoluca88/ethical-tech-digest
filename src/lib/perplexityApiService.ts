@@ -17,7 +17,7 @@ export class PerplexityApiService {
     
     const searchPrompt = generateSearchPrompt(source, category);
     const MAX_RETRIES = 3;
-    const TIMEOUT = 30000; // 30 seconds timeout
+    const TIMEOUT = 60000; // Extended to 60 seconds timeout for more thorough search
     
     try {
       console.log(`Inizio ricerca notizie per ${source.name} nella categoria ${category}...`);
@@ -54,19 +54,22 @@ export class PerplexityApiService {
               messages: [
                 {
                   role: 'system',
-                  content: 'Sei un assistente specializzato nella ricerca di notizie recenti sui risvolti etici delle nuove tecnologie. Rispondi solo con JSON parsabile. Cerca SOLO notizie degli ultimi 7 giorni, idealmente 2-3 giorni. Assicurati che TUTTI gli URL siano completi, funzionanti e accessibili.'
+                  content: 'Sei un assistente specializzato nella ricerca di notizie recenti sui risvolti etici delle nuove tecnologie. Rispondi solo con JSON parsabile. Cerca SOLO notizie degli ultimi 7 giorni, idealmente 2-3 giorni. La tua PRIORITÀ ASSOLUTA è fornire URL completi (con http:// o https://), funzionanti e accessibili che puntino direttamente agli articoli specifici. VERIFICA SEMPRE GLI URL PRIMA DI FORNIRLI.'
                 },
                 {
                   role: 'user',
                   content: searchPrompt
                 }
               ],
-              temperature: 0.2,
+              temperature: 0.1, // Lower temperature for more deterministic results
               top_p: 0.9,
-              max_tokens: 1000,
-              search_domain_filter: [searchDomain],
+              max_tokens: 1500, // Increased token limit for more detailed results
+              search_domain_filter: [searchDomain], 
               search_recency_filter: 'day',
-              freq_penalty: 0.5
+              web_search_explicitly_requested: true, // Explicitly request web search
+              true_it_is_okay_to_not_think_step_by_step: true, // Use Perplexity's search directly
+              frequency_penalty: 0.5,
+              presence_penalty: 0.1
             }),
           });
           
@@ -103,21 +106,44 @@ export class PerplexityApiService {
             
             console.log(`Trovati ${results.length} risultati per ${source.name} nella categoria ${category}`);
             
-            // Valida gli URL prima di restituire i risultati
+            // Validazione più rigorosa degli URL
             const validatedResults = results.filter(result => {
-              const isValidUrl = result.url && 
-                (result.url.startsWith('http://') || result.url.startsWith('https://'));
-              
-              if (!isValidUrl) {
-                console.warn(`URL non valido scartato: ${result.url}`);
+              try {
+                // Verifica se l'URL è sintaticamente valido
+                const urlObj = new URL(result.url);
+                const isValidUrl = urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+                
+                if (!isValidUrl) {
+                  console.warn(`URL non valido scartato: ${result.url}`);
+                }
+                
+                // Verifica che non sia un URL parziale o generico
+                const isNotGeneric = urlObj.pathname !== '/' && urlObj.pathname.length > 1;
+                
+                if (!isNotGeneric) {
+                  console.warn(`URL generico scartato: ${result.url}`);
+                }
+                
+                return isValidUrl && isNotGeneric;
+              } catch (error) {
+                console.warn(`URL malformato scartato: ${result.url}`);
+                return false;
               }
-              return isValidUrl;
             });
             
             if (validatedResults.length === 0) {
               console.warn(`Nessun risultato con URL valido trovato per ${source.name} nella categoria ${category}`);
+              if (attempt < MAX_RETRIES) {
+                console.log('Riprovo con parametri diversi...');
+                continue;
+              }
             } else {
-              console.log('Primo articolo trovato:', validatedResults[0].title, validatedResults[0].date);
+              console.log('Primi articoli trovati:');
+              validatedResults.forEach((result, i) => {
+                console.log(`[${i + 1}] Titolo: ${result.title}`);
+                console.log(`    URL: ${result.url}`);
+                console.log(`    Data: ${result.date || 'Non specificata'}`);
+              });
             }
             
             return validatedResults;
