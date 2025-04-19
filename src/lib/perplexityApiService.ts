@@ -18,6 +18,8 @@ export class PerplexityApiService {
     const searchPrompt = generateSearchPrompt(source, category);
     
     try {
+      console.log(`Ricerca notizie per ${source.name} nella categoria ${category}...`);
+      
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
@@ -29,7 +31,7 @@ export class PerplexityApiService {
           messages: [
             {
               role: 'system',
-              content: 'Sei un assistente specializzato nella ricerca di notizie sui risvolti etici delle nuove tecnologie. Rispondi solo con JSON parsabile.'
+              content: 'Sei un assistente specializzato nella ricerca di notizie sui risvolti etici delle nuove tecnologie. Rispondi solo con JSON parsabile. Cerca sempre notizie molto recenti e diverse da quelle già trovate.'
             },
             {
               role: 'user',
@@ -40,7 +42,7 @@ export class PerplexityApiService {
           top_p: 0.9,
           max_tokens: 1000,
           search_domain_filter: [source.url],
-          search_recency_filter: 'month'
+          search_recency_filter: 'day' // Cambiato da 'month' a 'day' per ottenere notizie più recenti
         }),
       });
     
@@ -60,7 +62,10 @@ export class PerplexityApiService {
       try {
         const jsonMatch = content.match(/\[[\s\S]*\]/);
         const jsonString = jsonMatch ? jsonMatch[0] : content;
-        return JSON.parse(jsonString) as NewsSearchResult[];
+        const results = JSON.parse(jsonString) as NewsSearchResult[];
+        
+        console.log(`Trovati ${results.length} risultati per ${source.name} nella categoria ${category}`);
+        return results;
       } catch (parseError) {
         console.error('Errore parsing JSON:', parseError, 'Contenuto:', content);
         throw new Error('Impossibile interpretare la risposta dell\'API come JSON');

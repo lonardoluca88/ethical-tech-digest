@@ -24,7 +24,7 @@ export class NewsFetchingService {
   static async checkAndFetchNews(): Promise<FetchNewsResult> {
     try {
       if (NewsStorageService.shouldFetchNews()) {
-        return await this.fetchNews();
+        return await NewsFetchingService.fetchNews();
       }
       
       return {
@@ -79,6 +79,7 @@ export class NewsFetchingService {
       for (const source of sources) {
         for (const category of categories) {
           try {
+            console.log(`Cercando notizie da ${source.name} per la categoria ${category}...`);
             const newsItems = await PerplexitySearchService.searchNewsFromSource(source, category);
             
             // Add non-duplicate items
@@ -86,6 +87,7 @@ export class NewsFetchingService {
               if (!existingNews.some(existingItem => existingItem.url === item.url)) {
                 allNews.push(item);
                 newArticlesCount++;
+                console.log(`Nuovo articolo trovato: ${item.title}`);
               }
             }
           } catch (categoryError) {
@@ -116,6 +118,6 @@ export class NewsFetchingService {
    * Manual trigger for news fetch
    */
   static async refreshNews(): Promise<FetchNewsResult> {
-    return await this.fetchNews();
+    return await NewsFetchingService.fetchNews();
   }
 }

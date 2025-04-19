@@ -5,7 +5,7 @@ export class NewsSchedulerService {
   /**
    * Schedules the daily news fetch at 6:00 AM
    */
-  static scheduleDailyFetch(fetchCallback: () => Promise<void>): void {
+  static scheduleDailyFetch(fetchCallback: () => Promise<any>): void {
     // Check if already scheduled
     if (localStorage.getItem(SCHEDULER_ACTIVE_KEY) === 'true') {
       console.log('News scheduler already active');
@@ -32,7 +32,7 @@ export class NewsSchedulerService {
   /**
    * Calculates the time until the next 6:00 AM and schedules the fetch
    */
-  private static scheduleNextRun(fetchCallback: () => Promise<void>): void {
+  private static scheduleNextRun(fetchCallback: () => Promise<any>): void {
     const now = new Date();
     const nextRun = new Date(now);
     
