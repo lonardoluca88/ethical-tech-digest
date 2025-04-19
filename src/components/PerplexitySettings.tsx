@@ -8,7 +8,7 @@ import { RefreshCw, Key, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { PerplexitySearchService } from '@/lib/perplexitySearchService';
 import { NewsFetchingService } from '@/lib/newsFetchingService';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 
 const PerplexitySettings: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>('');
@@ -20,8 +20,13 @@ const PerplexitySettings: React.FC = () => {
     // Verifica la connessione a Supabase
     const checkSupabaseConnection = async () => {
       try {
-        await supabase.from('dummy').select('*').limit(1);
-        setIsSupabaseConnected(true);
+        // Use the rpc method to check connection instead of querying a table
+        const { error } = await supabase.rpc('version');
+        setIsSupabaseConnected(!error);
+        if (error) {
+          console.error('Errore di connessione a Supabase:', error);
+          setIsSupabaseConnected(false);
+        }
       } catch (error) {
         console.error('Errore di connessione a Supabase:', error);
         setIsSupabaseConnected(false);
