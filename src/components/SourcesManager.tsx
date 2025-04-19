@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NewsSource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -16,22 +15,27 @@ interface SourcesManagerProps {
 
 const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [currentSource, setCurrentSource] = useState<Partial<NewsSource>>({
     name: '',
     url: '',
     reliability: 7
   });
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
   const handleRefreshNews = async () => {
     setIsRefreshing(true);
     
     try {
+      toast.info('Ricerca notizie in corso...', { duration: 3000 });
       const result = await NewsFetchingService.refreshNews();
       
       if (result.success) {
-        toast.success(`Ricerca notizie completata: ${result.newArticlesCount} nuovi articoli trovati`);
+        if (result.newArticlesCount && result.newArticlesCount > 0) {
+          toast.success(`Ricerca completata: ${result.newArticlesCount} nuovi articoli trovati`);
+        } else {
+          toast.info('Nessun nuovo articolo trovato. Prova a modificare le fonti o verifica la chiave API.');
+        }
       } else {
         toast.error(`Errore durante la ricerca: ${result.message}`);
       }
@@ -117,10 +121,10 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
             onClick={handleRefreshNews} 
             size="sm"
             variant="outline"
-            disabled={isRefreshing}
+            disabled={isRefreshing || sources.length === 0}
           >
             <RefreshCw size={16} className={`mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Aggiorna Notizie
+            {isRefreshing ? 'Ricerca in corso...' : 'Aggiorna Notizie'}
           </Button>
           <Button onClick={() => handleOpenDialog()} size="sm">
             <Plus size={16} className="mr-1" />
@@ -128,6 +132,12 @@ const SourcesManager: React.FC<SourcesManagerProps> = ({ sources, onUpdate }) =>
           </Button>
         </div>
       </div>
+      
+      {sources.length === 0 && (
+        <div className="mb-4 p-3 border border-yellow-300 bg-yellow-50 text-yellow-800 rounded-md">
+          <p>Prima di cercare notizie, devi creare almeno una fonte. Usa il pulsante "Aggiungi Fonte" per iniziare.</p>
+        </div>
+      )}
       
       <SourcesTable 
         sources={sources}
