@@ -15,17 +15,21 @@ const PerplexitySettings: React.FC = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   useEffect(() => {
-    const savedKey = PerplexitySearchService.getApiKey();
-    if (savedKey) {
-      setApiKey(savedKey);
-    }
+    const loadApiKey = async () => {
+      const savedKey = await PerplexitySearchService.getApiKey();
+      if (savedKey) {
+        setApiKey(savedKey);
+      }
+    };
+    
+    loadApiKey();
   }, []);
 
-  const handleSaveKey = () => {
+  const handleSaveKey = async () => {
     setIsSaving(true);
     
     try {
-      PerplexitySearchService.setApiKey(apiKey);
+      await PerplexitySearchService.setApiKey(apiKey);
       toast.success('API key salvata con successo');
     } catch (error) {
       toast.error('Errore nel salvare l\'API key');
@@ -35,10 +39,15 @@ const PerplexitySettings: React.FC = () => {
     }
   };
 
-  const handleClearKey = () => {
-    setApiKey('');
-    PerplexitySearchService.clearApiKey();
-    toast.success('API key rimossa');
+  const handleClearKey = async () => {
+    try {
+      await PerplexitySearchService.clearApiKey();
+      setApiKey('');
+      toast.success('API key rimossa');
+    } catch (error) {
+      toast.error('Errore nella rimozione dell\'API key');
+      console.error('Error clearing API key:', error);
+    }
   };
 
   const handleTestConnection = async () => {
@@ -50,10 +59,7 @@ const PerplexitySettings: React.FC = () => {
     setIsTestingConnection(true);
     
     try {
-      // Save the key first
-      PerplexitySearchService.setApiKey(apiKey);
-      
-      // Try to run a news fetch to test the connection
+      await PerplexitySearchService.setApiKey(apiKey);
       const result = await NewsFetchingService.refreshNews();
       
       if (result.success) {

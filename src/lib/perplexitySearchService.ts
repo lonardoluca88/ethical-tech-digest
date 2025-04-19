@@ -1,5 +1,5 @@
-
 import { NewsItem, NewsCategory, NewsSource } from '@/lib/types';
+import { supabase } from '@/lib/supabaseClient';
 
 interface PerplexitySearchResponse {
   id: string;
@@ -24,32 +24,50 @@ interface NewsSearchResult {
 export class PerplexitySearchService {
   private static apiKey: string | null = null;
   
-  static setApiKey(key: string): void {
+  static async setApiKey(key: string): Promise<void> {
+    const { data, error } = await supabase.functions.invoke('set-perplexity-key', {
+      body: { key }
+    });
+    
+    if (error) {
+      throw new Error('Errore nel salvare l\'API key: ' + error.message);
+    }
+    
     this.apiKey = key;
-    localStorage.setItem('ethicalTechDigest_perplexity_key', key);
   }
   
-  static getApiKey(): string | null {
+  static async getApiKey(): Promise<string | null> {
     if (this.apiKey) return this.apiKey;
     
-    const storedKey = localStorage.getItem('ethicalTechDigest_perplexity_key');
-    if (storedKey) {
-      this.apiKey = storedKey;
+    const { data, error } = await supabase.functions.invoke('get-perplexity-key');
+    
+    if (error) {
+      console.error('Errore nel recuperare l\'API key:', error);
+      return null;
+    }
+    
+    if (data?.key) {
+      this.apiKey = data.key;
     }
     
     return this.apiKey;
   }
   
-  static clearApiKey(): void {
+  static async clearApiKey(): Promise<void> {
+    const { error } = await supabase.functions.invoke('clear-perplexity-key');
+    
+    if (error) {
+      throw new Error('Errore nella rimozione dell\'API key: ' + error.message);
+    }
+    
     this.apiKey = null;
-    localStorage.removeItem('ethicalTechDigest_perplexity_key');
   }
   
   static async searchNewsFromSource(source: NewsSource, category: NewsCategory): Promise<NewsSearchResult[]> {
-    const apiKey = this.getApiKey();
+    const apiKey = await this.getApiKey();
     
     if (!apiKey) {
-      throw new Error('API key not configured. Please set a Perplexity API key in the settings.');
+      throw new Error('API key non configurata. Configura una Perplexity API key nelle impostazioni.');
     }
     
     const keywords = this.getCategoryKeywords(category);
