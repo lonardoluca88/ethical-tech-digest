@@ -81,7 +81,7 @@ const PerplexitySettings: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Alert className="mb-4" variant="warning">
+        <Alert className="mb-4" variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             La chiave API è necessaria per il funzionamento del sistema di ricerca notizie.
